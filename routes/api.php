@@ -13,5 +13,7 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::any('test','Api\TestController@test');
 Route::post('/login','Api\UserController@login');
-Route::any('/user/list','Api\UserController@list')->middleware('auth:api');
+Route::any('/user/list','Api\UserController@list');
+Route::post('/user/add','Api\UserController@add');

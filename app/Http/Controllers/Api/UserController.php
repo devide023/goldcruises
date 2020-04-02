@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -42,6 +44,155 @@ class UserController extends Controller
                 'cityname:code,name',
                 'districtname:code,name'
             ])->get();
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function add(Request $request)
+    {
+        try
+        {
+            $list = User::where('usercode', $request->usercode)->get();
+            if ($list->count() > 0)
+            {
+                return [
+                    'code'   => 0,
+                    'msg'    => '用户编码已存在',
+                    'result' => null
+                ];
+            }
+            $user = User::create([
+                'status'    => $request->status,
+                'usercode'  => $request->usercode,
+                'sex'       => $request->sex,
+                'name'      => $request->username,
+                'userpwd'   => \hash('sha256',$request->password),
+                'birthdate' => $request->birthday,
+                'idno'      => $request->idno,
+                'tel'       => $request->tel,
+                'adress'    => $request->address,
+                'email'     => $request->email,
+                'province'  => $request->province,
+                'city'      => $request->city,
+                'district'  => $request->district,
+                'adduserid' => $request->adduserid,
+                'addtime'   => now(),
+                'headimg'   => $request->headimg,
+                'api_token' => \hash('sha256', Str::random(50)),
+            ]);
+            if ($user->id > 0)
+            {
+                return [
+                    'code'   => 1,
+                    'msg'    => 'ok',
+                    'result' => $user
+                ];
+            } else
+            {
+                return [
+                    'code'   => 0,
+                    'msg'    => 'error',
+                    'result' => null
+                ];
+            }
+
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function edit(Request $request)
+    {
+        try
+        {
+            $usercode = $request->usercode;
+            if (is_null($usercode))
+            {
+                return [
+                    'code'   => 0,
+                    'msg'    => '用户编码不存在',
+                    'result' => null
+                ];
+            }
+            $user = User::where('usercode', $usercode)->first();
+            if (!is_null($user))
+            {
+                $isok = $user->save([
+                    'status'    => $request->status,
+                    'sex'       => $request->sex,
+                    'name'      => $request->username,
+                    'birthdate' => $request->birthday,
+                    'idno'      => $request->idno,
+                    'tel'       => $request->tel,
+                    'adress'    => $request->address,
+                    'email'     => $request->email,
+                    'province'  => $request->province,
+                    'city'      => $request->city,
+                    'district'  => $request->district,
+                ]);
+                if ($isok)
+                {
+                    return [
+                        'code' => 1,
+                        'msg'  => '操作成功'
+                    ];
+                } else
+                {
+                    return [
+                        'code' => 0,
+                        'msg'  => '操作失败',
+                    ];
+                }
+            }else{
+                return [
+                    'code' => 0,
+                    'msg'  => '操作失败',
+                ];
+            }
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function modifypwd(Request $request)
+    {
+        try
+        {
+            $usercode = $request->usercode;
+            if (is_null($usercode))
+            {
+                $user = User::where('usercode',$usercode)->first();
+                if(is_null($user)){
+                    return [
+                        'code'   => 0,
+                        'msg'    => '用户编码不存在',
+                        'result' => null
+                    ];
+                }
+                return [
+                    'code'   => 0,
+                    'msg'    => '用户编码不存在',
+                    'result' => null
+                ];
+            }
+            $user = User::where('usercode',$usercode)->first();
+            if($user->userpwd == $request->password){
+                $isok = $user->save([
+                   'userpwd'=>\hash('sha256',$request->newpassword)
+                ]);
+                if($isok){
+                    parent::success();
+                }else{
+                    parent::error();
+                }
+            }
         } catch (Exception $exception)
         {
             throw  $exception;

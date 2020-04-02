@@ -10,4 +10,22 @@ use Illuminate\Routing\Controller as BaseController;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+
+    public function error(){
+        return [
+            'code'   => 0,
+            'msg'    => '数据操作失败',
+        ];
+    }
+
+    public function success(){
+        return  [
+            'code'   => 1,
+            'msg'    => '数据操作成功',
+        ];
+    }
+
+    public function result(array $data){
+        return $data;
+    }
 }
