@@ -42,8 +42,13 @@ class Organize extends Model
     protected $guarded=[];
     public $timestamps=false;
     protected $casts=[];
-
+    protected $with=[
+      'orgtypename:code,name',
+    ];
     public function users(){
         return $this->belongsToMany('App\Models\User','userorg','orgid','userid');
+    }
+    public function orgtypename(){
+        return $this->belongsTo('App\Models\OrganizeType','orgtype','code');
     }
 }
