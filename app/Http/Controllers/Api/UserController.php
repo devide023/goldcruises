@@ -19,31 +19,25 @@ class UserController extends Controller
             $query = User::query();
             $query->when($request->username, function (Builder $q) use ($request)
             {
-                $q->where('name', 'like', '%' . $request->username . '%');
+                return $q->where('name', 'like', '%' . $request->username . '%');
             });
             $query->when($request->address, function (Builder $q) use ($request)
             {
-                $q->where('address', 'like', '%' . $request->address . '%');
+                return $q->where('address', 'like', '%' . $request->address . '%');
             });
             $query->when($request->idno, function (Builder $q) use ($request)
             {
-                $q->where('idno', 'like', '%' . $request->idno . '%');
+                return $q->where('idno', 'like', '%' . $request->idno . '%');
             });
             $query->when($request->tel, function (Builder $q) use ($request)
             {
-                $q->where('tel', 'like', '%' . $request->tel . '%');
+                return $q->where('tel', 'like', '%' . $request->tel . '%');
             });
             $query->when($request->email, function (Builder $q) use ($request)
             {
-                $q->where('email', 'like', '%' . $request->email . '%');
+               return $q->where('email', 'like', '%' . $request->email . '%');
             });
-            return $query->with([
-                'adduser:id,name',
-                'sexname:code,name',
-                'provincename:code,name',
-                'cityname:code,name',
-                'districtname:code,name'
-            ])->get();
+            return $query->get();
         } catch (Exception $exception)
         {
             throw  $exception;
@@ -122,7 +116,7 @@ class UserController extends Controller
             $user = User::where('usercode', $usercode)->first();
             if (!is_null($user))
             {
-                $isok = $user->save([
+                $isok = $user->update([
                     'status'    => $request->status,
                     'sex'       => $request->sex,
                     'name'      => $request->username,
@@ -161,6 +155,31 @@ class UserController extends Controller
 
     }
 
+    public function del(Request $request)
+    {
+        try
+        {
+            $uid = $request->id;
+            if(!is_null($uid)){
+                $user = User::find($uid);
+                if(!is_null($user)){
+                    $user->delete();
+                    return $this->success();
+                }
+            }else
+            {
+                return [
+                  'code'=>0,
+                  'msg'=>'参数错误',
+                ];
+            }
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
     public function modifypwd(Request $request)
     {
         try
@@ -182,16 +201,24 @@ class UserController extends Controller
                     'result' => null
                 ];
             }
-            $user = User::where('usercode',$usercode)->first();
-            if($user->userpwd == $request->password){
-                $isok = $user->save([
-                   'userpwd'=>\hash('sha256',$request->newpassword)
+            $user = User::where('usercode','=',$usercode)->first();
+            $pwdnew = \hash('sha256',$request->newpassword);
+            if(!is_null($user) && $user->userpwd ==\hash('sha256',$request->password) ) {
+                $isok = $user->update([
+                   'userpwd'=>$pwdnew
                 ]);
                 if($isok){
-                    parent::success();
+                   return parent::success();
                 }else{
-                    parent::error();
+                   return parent::error();
                 }
+            }
+            else{
+                return [
+                    'code'   => 0,
+                    'msg'    => '密码不正确',
+                    'result' => null
+                ];
             }
         } catch (Exception $exception)
         {
@@ -233,6 +260,18 @@ class UserController extends Controller
                     'token' => null
                 ];
             }
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function logout(Request $request)
+    {
+        try
+        {
+
         } catch (Exception $exception)
         {
             throw  $exception;

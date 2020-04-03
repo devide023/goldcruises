@@ -19,9 +19,11 @@ class CreateOrganizeTalbe extends Migration
             $table->bigIncrements('id');
             $table->integer('pid')->nullable()->default(null)->comment('父id');
             $table->string('name', 100)->nullable()->default(null)->comment('组织节点名称');
+            $table->string('orgcode',100)->nullable()->default(null)->comment('节点编码');
             $table->integer('status')->nullable()->default(1)->comment('状态');
             $table->integer('orgtype')->nullable()->default(null)->comment('节点类型');
             $table->integer('leader')->nullable(true)->comment('领导人/法人');
+            $table->string('logo',1000)->nullable()->default(null)->comment('节点标志');
             $table->integer('adduserid')->nullable()->default(null)->comment('操作人');
             $table->dateTime('addtime')->nullable()->default(now())->comment('操作时间');
         });

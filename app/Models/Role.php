@@ -36,11 +36,15 @@ class Role extends Model
     public $timestamps=false;
     protected $guarded=[];
     protected $casts=[];
-
+    protected $with = [
+      'adduser:id,name',
+    ];
     public function users(){
         return $this->belongsToMany('App\Models\User','roleuser','roleid','userid');
     }
-
+    public function adduser(){
+        return $this->belongsTo('App\Models\User','adduserid','id');
+    }
     public function menus(){
         return $this->belongsToMany('App\Models\Menu','rolemenu','roleid','menuid');
     }

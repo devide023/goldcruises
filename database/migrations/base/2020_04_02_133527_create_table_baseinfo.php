@@ -40,6 +40,15 @@ class CreateTableBaseinfo extends Migration
             $table->dateTime('addtime')->nullable()->default(now())->comment('操作日期');
         });
 
+        Schema::dropIfExists('menutype');
+        Schema::create('menutype',function (Blueprint $table){
+            $table->increments('id');
+            $table->integer('status')->nullable()->default(1)->comment('状态');
+            $table->string('code',100)->nullable()->default(null)->comment('类型编码');
+            $table->string('name',200)->nullable(true)->comment('类型名称');
+            $table->dateTime('addtime')->nullable()->default(now())->comment('操作日期');
+        });
+
     }
 
     /**
@@ -52,5 +61,6 @@ class CreateTableBaseinfo extends Migration
         Schema::dropIfExists('city');
         Schema::dropIfExists('sex');
         Schema::dropIfExists('config');
+        Schema::dropIfExists('menutype');
     }
 }

@@ -5,8 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 
-
-
 /**
  * App\Models\User
  *
@@ -67,31 +65,50 @@ class User extends \Illuminate\Foundation\Auth\User
     public $timestamps = false;
     protected $guarded = [];
     protected $casts = [];
+    protected $hidden = [
+        'userpwd',
+        'api_token'
+    ];
+    protected $with = [
+        'sexname:code,name',
+        'adduser:id,name',
+        'provincename:code,name',
+        'cityname:code,name',
+        'districtname:code,name'
+    ];
 
     public function roles()
     {
         return $this->belongsToMany('App\Models\Role', 'roleuser', 'userid', 'roleid');
     }
 
-    public function orgnodes(){
-        return $this->belongsToMany('App\Models\Organize','userorg','userid','orgid');
+    public function orgnodes()
+    {
+        return $this->belongsToMany('App\Models\Organize', 'userorg', 'userid', 'orgid');
     }
 
-    public function sexname(){
-        return $this->belongsTo('App\Models\Sex','sex','code');
+    public function sexname()
+    {
+        return $this->belongsTo('App\Models\Sex', 'sex', 'code');
     }
 
-    public function adduser(){
-        return $this->belongsTo('App\Models\User','adduserid','id');
+    public function adduser()
+    {
+        return $this->belongsTo('App\Models\User', 'adduserid', 'id');
     }
 
-    public function provincename(){
-        return $this->belongsTo('App\Models\City', 'province','code');
+    public function provincename()
+    {
+        return $this->belongsTo('App\Models\City', 'province', 'code');
     }
-    public function cityname(){
-        return $this->belongsTo('App\Models\City', 'city','code');
+
+    public function cityname()
+    {
+        return $this->belongsTo('App\Models\City', 'city', 'code');
     }
-    public function districtname(){
-        return $this->belongsTo('App\Models\City', 'district','code');
+
+    public function districtname()
+    {
+        return $this->belongsTo('App\Models\City', 'district', 'code');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 
+
 /**
  * App\Models\Menu
  *
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $status 状态
  * @property int $adduserid 操作人
  * @property string $addtime 操作日期
+ * @property-read \App\Models\User $adduser
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Role[] $roles
  * @property-read int|null $roles_count
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Menu newModelQuery()
@@ -36,12 +38,27 @@ use Illuminate\Database\Eloquent\Model;
 class Menu extends Model
 {
     //
-    protected $table='menu';
-    public $timestamps=false;
-    protected $guarded=[];
-    protected $casts=[];
+    protected $table = 'menu';
+    public $timestamps = false;
+    protected $guarded = [];
+    protected $casts = [];
+    protected $with = [
+        'adduser:id,name',
+        'typename:code,name'
+    ];
 
-    public function roles(){
-        return $this->belongsToMany('App\Models\Role','rolemenu','menuid','roleid');
+    public function adduser()
+    {
+        return $this->belongsTo('App\Models\User', 'adduserid', 'id');
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany('App\Models\Role', 'rolemenu', 'menuid', 'roleid');
+    }
+
+    public function typename()
+    {
+       return $this->belongsTo('App\Models\MenuType', 'menutype', 'code');
     }
 }

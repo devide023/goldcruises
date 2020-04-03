@@ -24,8 +24,4 @@ class Controller extends BaseController
             'msg'    => '数据操作成功',
         ];
     }
-
-    public function result(array $data){
-        return $data;
-    }
 }
