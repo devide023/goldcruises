@@ -6,12 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
-    //
+
     public function list(Request $request)
     {
         try
@@ -37,7 +40,7 @@ class UserController extends Controller
             {
                return $q->where('email', 'like', '%' . $request->email . '%');
             });
-            return $query->get();
+            return $query->paginate();
         } catch (Exception $exception)
         {
             throw  $exception;
@@ -72,7 +75,7 @@ class UserController extends Controller
                 'province'  => $request->province,
                 'city'      => $request->city,
                 'district'  => $request->district,
-                'adduserid' => $request->adduserid,
+                'adduserid' => Auth::user()->id,
                 'addtime'   => now(),
                 'headimg'   => $request->headimg,
                 'api_token' => \hash('sha256', Str::random(50)),
@@ -98,6 +101,38 @@ class UserController extends Controller
             throw  $exception;
         }
 
+    }
+
+    public function userroles(Request $request)
+    {
+        try{
+            $user = User::find($request->id);
+            $roleids = $request->roleid;
+            $user->roles()->sync($roleids);
+            return $this->success();
+        }
+        catch (Exception $exception){
+
+        }
+    }
+
+    public function userorgs(Request $request)
+    {
+        try{
+            $user = User::find($request->id);
+            $orgids = $request->orgid;
+            $attr = ['main'=>0,'adduserid'=>Auth::user()->id,'addtime'=>now()];
+            $postdata=[];
+            foreach ($orgids as $orgid){
+                $postdata[$orgid]= $attr;
+            }
+            $postdata[Arr::random($orgids)]['main']=1;
+            $user->orgnodes()->sync($postdata);
+            return $this->success();
+        }
+        catch (Exception $exception){
+
+        }
     }
 
     public function edit(Request $request)
@@ -161,11 +196,13 @@ class UserController extends Controller
         {
             $uid = $request->id;
             if(!is_null($uid)){
-                $user = User::find($uid);
-                if(!is_null($user)){
+                DB::transaction(function () use ($request){
+                    $user = User::find($request->id);
                     $user->delete();
-                    return $this->success();
-                }
+                    $user->roles()->detach();
+                    $user->orgnodes()->detach();
+                });
+                return $this->success();
             }else
             {
                 return [
@@ -232,12 +269,17 @@ class UserController extends Controller
         try
         {
             $usercode = $request->username;
-            $userpwd = $request->userpwd;
+            $userpwd = $request->passwrod;
             $user = User::where('usercode', $usercode)->first();
+            $isok = Auth::attempt([
+                'usercode'=>$usercode,
+                'userpwd'=>$userpwd
+            ]);
+            var_dump($isok);
             if (!is_null($user))
             {
-                $pwd = decrypt($user->userpwd);
-                if ($pwd == $userpwd)
+                $pwd = hash('sha256',$userpwd);
+                if ($pwd == $user->userpwd)
                 {
                     return [
                         'code'  => 1,
@@ -271,7 +313,15 @@ class UserController extends Controller
     {
         try
         {
-
+           $user = Auth::user();
+           $isok = $user->update([
+              'api_token' =>\hash('sha256',Str::random(60)),
+           ]);
+           if($isok){
+               return $this->success();
+           }else{
+               return $this->error();
+           }
         } catch (Exception $exception)
         {
             throw  $exception;

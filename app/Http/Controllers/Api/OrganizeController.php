@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Organize;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class OrganizeController extends Controller
 {
@@ -68,7 +70,7 @@ class OrganizeController extends Controller
                 'orgcode'   => $request->orgcode,
                 'logo'      => $request->logo,
                 'addtime'   => now(),
-                'adduserid' => $request->adduser
+                'adduserid' => Auth::user()->id
             ]);
             if ($org->id > 0)
             {
@@ -126,14 +128,12 @@ class OrganizeController extends Controller
     {
         try
         {
-            $ret = Organize::destroy($request->id);
-            if ($ret > 0)
-            {
+            DB::transaction(function () use ($request){
+                $org = Organize::find($request->id);
+                $org->users()->detach();
+                $org->delete();
+            });
                 return $this->success();
-            } else
-            {
-                return $this->error();
-            }
         } catch (Exception $exception)
         {
             throw  $exception;

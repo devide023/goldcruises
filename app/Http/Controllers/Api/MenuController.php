@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class MenuController extends Controller
 {
@@ -57,7 +59,7 @@ class MenuController extends Controller
                 'menucode'  => $request->menucode,
                 'menutype'  => $request->menutype,
                 'icon'      => $request->icon,
-                'adduserid' => $request->adduser,
+                'adduserid' => Auth::user()->id,
                 'addtime'   => now(),
                 'status'    => $request->status
             ]);
@@ -117,19 +119,28 @@ class MenuController extends Controller
     {
         try
         {
-            $ret = Menu::destroy($request->id);
-            if ($ret > 0)
-            {
-                return $this->success();
-            } else
-            {
-                return $this->error();
-            }
+           DB::transaction(function () use ($request){
+               $menu = Menu::find($request->id);
+               $menu->delete();
+               $menu->roles()->detach();
+           });
+           return $this->success();
         } catch (Exception $exception)
         {
             throw  $exception;
         }
 
+    }
+
+    public function menuroles(Request $request)
+    {
+        try{
+            $menu = Menu::find($request->id);
+            $menu->roles()->sync($request->roleids);
+            return $this->success();
+        }catch (Exception $exception){
+
+        }
     }
 
 }

@@ -15,20 +15,36 @@ use Illuminate\Support\Facades\Route;
 */
 Route::any('test','Api\TestController@test');
 
+Route::middleware('auth:api')->group(function (){
+
+    Route::post('/user/list','Api\UserController@list');
+    Route::post('/user/add','Api\UserController@add');
+    Route::post('/user/del','Api\UserController@del');
+    Route::post('/user/userrole','Api\UserController@userroles');
+    Route::post('/user/userorg','Api\UserController@userorgs');
+    Route::post('/user/edit','Api\UserController@edit');
+    Route::post('/user/chpwd','Api\UserController@modifypwd');
+    Route::any('/user/logout','Api\UserController@logout');
+
+    Route::post('/role/list','Api\RoleController@list');
+    Route::post('/role/add','Api\RoleController@add');
+    Route::post('/role/edit','Api\RoleController@edit');
+    Route::post('/role/del','Api\RoleController@del');
+    Route::post('/role/roleuser','Api\RoleController@roleuser');
+    Route::post('/role/rolemenu','Api\RoleController@rolemenu');
+
+    Route::post('/menu/list','Api\MenuController@list');
+    Route::post('/menu/add','Api\MenuController@add');
+    Route::post('/menu/del','Api\MenuController@del');
+    Route::post('/menu/edit','Api\MenuController@edit');
+    Route::post('/menu/menurole','Api\MenuController@menuroles');
+
+    Route::post('/organize/list','Api\OrganizeController@list');
+    Route::post('/organize/add','Api\OrganizeController@add');
+    Route::post('/organize/del','Api\OrganizeController@del');
+    Route::post('/organize/edit','Api\OrganizeController@edit');
+
+});
+
 Route::post('/login','Api\UserController@login');
-Route::any('/user/list','Api\UserController@list');
-Route::post('/user/add','Api\UserController@add');
-Route::post('/user/edit','Api\UserController@edit');
-Route::post('/user/chpwd','Api\UserController@modifypwd');
 
-Route::post('/role/list','Api\RoleController@list');
-Route::post('/role/add','Api\RoleController@add');
-Route::post('/role/edit','Api\RoleController@edit');
-
-Route::post('/menu/list','Api\MenuController@list');
-Route::post('/menu/add','Api\MenuController@add');
-Route::post('/menu/edit','Api\MenuController@edit');
-
-Route::post('/organize/list','Api\OrganizeController@list');
-Route::post('/organize/add','Api\OrganizeController@add');
-Route::post('/organize/edit','Api\OrganizeController@edit');
