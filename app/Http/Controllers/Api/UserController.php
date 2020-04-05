@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Menu;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -327,6 +329,26 @@ class UserController extends Controller
             throw  $exception;
         }
 
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     * 获取用户的菜单
+     */
+    public function getusermenus(Request $request)
+    {
+        $menu = DB::table('roleuser')->where('roleuser.userid',$request->id)
+            ->join('rolemenu','roleuser.roleid','=','rolemenu.roleid')
+            ->join('menu','rolemenu.menuid','=','menu.id')
+            ->select([
+                'menu.id',
+                'menu.pid',
+                'menu.menucode',
+                'menu.name',
+                'menu.menutype',
+            ])->get();
+        return  $menu;
     }
 
 }

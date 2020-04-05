@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -138,6 +139,20 @@ class MenuController extends Controller
             $menu = Menu::find($request->id);
             $menu->roles()->sync($request->roleids);
             return $this->success();
+        }catch (Exception $exception){
+
+        }
+    }
+
+    public function getusers(Request $request)
+    {
+        try{
+            $ids = DB::table('rolemenu')->where('rolemenu.menuid',$request->id)
+                ->join('roleuser','roleuser.roleid','=','rolemenu.roleid')
+                ->join('user','user.id','=','roleuser.userid')
+                ->select('user.id');
+
+            return User::whereIn('id',$ids)->get();
         }catch (Exception $exception){
 
         }

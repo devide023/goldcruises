@@ -137,4 +137,24 @@ class RoleController extends Controller
         }
     }
 
+    public function getusers(Request $request)
+    {
+        try{
+            $role = Role::find($request->id);
+            return $role->users()->get();
+        }catch (Exception $exception){
+
+        }
+    }
+
+    public function getmenus(Request $request)
+    {
+        try{
+            $role = Role::find($request->id);
+            return $role->menus()->get();
+        }catch (Exception $exception){
+
+        }
+    }
+
 }
