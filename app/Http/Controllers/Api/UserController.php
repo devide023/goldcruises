@@ -12,6 +12,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class UserController extends Controller
@@ -40,7 +41,7 @@ class UserController extends Controller
             });
             $query->when($request->email, function (Builder $q) use ($request)
             {
-               return $q->where('email', 'like', '%' . $request->email . '%');
+                return $q->where('email', 'like', '%' . $request->email . '%');
             });
             return $query->paginate();
         } catch (Exception $exception)
@@ -68,7 +69,7 @@ class UserController extends Controller
                 'usercode'  => $request->usercode,
                 'sex'       => $request->sex,
                 'name'      => $request->username,
-                'userpwd'   => \hash('sha256',$request->password),
+                'userpwd'   => \hash('sha256', $request->password),
                 'birthdate' => $request->birthday,
                 'idno'      => $request->idno,
                 'tel'       => $request->tel,
@@ -107,32 +108,38 @@ class UserController extends Controller
 
     public function userroles(Request $request)
     {
-        try{
+        try
+        {
             $user = User::find($request->id);
             $roleids = $request->roleid;
             $user->roles()->sync($roleids);
             return $this->success();
-        }
-        catch (Exception $exception){
+        } catch (Exception $exception)
+        {
 
         }
     }
 
     public function userorgs(Request $request)
     {
-        try{
+        try
+        {
             $user = User::find($request->id);
             $orgids = $request->orgid;
-            $attr = ['main'=>0,'adduserid'=>Auth::user()->id,'addtime'=>now()];
-            $postdata=[];
-            foreach ($orgids as $orgid){
-                $postdata[$orgid]= $attr;
+            $attr = ['main'      => 0,
+                     'adduserid' => Auth::user()->id,
+                     'addtime'   => now()
+            ];
+            $postdata = [];
+            foreach ($orgids as $orgid)
+            {
+                $postdata[$orgid] = $attr;
             }
-            $postdata[Arr::random($orgids)]['main']=1;
+            $postdata[Arr::random($orgids)]['main'] = 1;
             $user->orgnodes()->sync($postdata);
             return $this->success();
-        }
-        catch (Exception $exception){
+        } catch (Exception $exception)
+        {
 
         }
     }
@@ -179,7 +186,8 @@ class UserController extends Controller
                         'msg'  => '操作失败',
                     ];
                 }
-            }else{
+            } else
+            {
                 return [
                     'code' => 0,
                     'msg'  => '操作失败',
@@ -197,19 +205,21 @@ class UserController extends Controller
         try
         {
             $uid = $request->id;
-            if(!is_null($uid)){
-                DB::transaction(function () use ($request){
+            if (!is_null($uid))
+            {
+                DB::transaction(function () use ($request)
+                {
                     $user = User::find($request->id);
                     $user->delete();
                     $user->roles()->detach();
                     $user->orgnodes()->detach();
                 });
                 return $this->success();
-            }else
+            } else
             {
                 return [
-                  'code'=>0,
-                  'msg'=>'参数错误',
+                    'code' => 0,
+                    'msg'  => '参数错误',
                 ];
             }
         } catch (Exception $exception)
@@ -226,8 +236,9 @@ class UserController extends Controller
             $usercode = $request->usercode;
             if (is_null($usercode))
             {
-                $user = User::where('usercode',$usercode)->first();
-                if(is_null($user)){
+                $user = User::where('usercode', $usercode)->first();
+                if (is_null($user))
+                {
                     return [
                         'code'   => 0,
                         'msg'    => '用户编码不存在',
@@ -240,19 +251,22 @@ class UserController extends Controller
                     'result' => null
                 ];
             }
-            $user = User::where('usercode','=',$usercode)->first();
-            $pwdnew = \hash('sha256',$request->newpassword);
-            if(!is_null($user) && $user->userpwd ==\hash('sha256',$request->password) ) {
+            $user = User::where('usercode', '=', $usercode)->first();
+            $pwdnew = \hash('sha256', $request->newpassword);
+            if (!is_null($user) && $user->userpwd == \hash('sha256', $request->password))
+            {
                 $isok = $user->update([
-                   'userpwd'=>$pwdnew
+                    'userpwd' => $pwdnew
                 ]);
-                if($isok){
-                   return parent::success();
-                }else{
-                   return parent::error();
+                if ($isok)
+                {
+                    return parent::success();
+                } else
+                {
+                    return parent::error();
                 }
-            }
-            else{
+            } else
+            {
                 return [
                     'code'   => 0,
                     'msg'    => '密码不正确',
@@ -271,16 +285,11 @@ class UserController extends Controller
         try
         {
             $usercode = $request->username;
-            $userpwd = $request->passwrod;
+            $userpwd = $request->password;
             $user = User::where('usercode', $usercode)->first();
-            $isok = Auth::attempt([
-                'usercode'=>$usercode,
-                'userpwd'=>$userpwd
-            ]);
-            var_dump($isok);
             if (!is_null($user))
             {
-                $pwd = hash('sha256',$userpwd);
+                $pwd = hash('sha256', $userpwd);
                 if ($pwd == $user->userpwd)
                 {
                     return [
@@ -311,19 +320,48 @@ class UserController extends Controller
 
     }
 
+    public function info(Request $request)
+    {
+        try
+        {
+            $user = User::where('id',Auth::id())->select(
+              [
+                  'id',
+                  'name',
+                  'idno',
+                  'adress',
+                  'tel',
+                  'email',
+                  'headimg'
+              ]
+            )->first();
+            $user['headimg'] = asset('/storage/'.$user->headimg);
+            return [
+                'code' => 1,
+                'user' =>$user
+            ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
     public function logout(Request $request)
     {
         try
         {
-           $user = Auth::user();
-           $isok = $user->update([
-              'api_token' =>\hash('sha256',Str::random(60)),
-           ]);
-           if($isok){
-               return $this->success();
-           }else{
-               return $this->error();
-           }
+            $user = Auth::user();
+            $isok = $user->update([
+                'api_token' => \hash('sha256', Str::random(60)),
+            ]);
+            if ($isok)
+            {
+                return $this->success();
+            } else
+            {
+                return $this->error();
+            }
         } catch (Exception $exception)
         {
             throw  $exception;
@@ -338,17 +376,16 @@ class UserController extends Controller
      */
     public function getusermenus(Request $request)
     {
-        $menu = DB::table('roleuser')->where('roleuser.userid',$request->id)
-            ->join('rolemenu','roleuser.roleid','=','rolemenu.roleid')
-            ->join('menu','rolemenu.menuid','=','menu.id')
-            ->select([
+        $menu = DB::table('roleuser')->where('roleuser.userid', $request->id)
+            ->join('rolemenu', 'roleuser.roleid', '=', 'rolemenu.roleid')
+            ->join('menu', 'rolemenu.menuid', '=', 'menu.id')->select([
                 'menu.id',
                 'menu.pid',
                 'menu.menucode',
                 'menu.name',
                 'menu.menutype',
             ])->get();
-        return  $menu;
+        return $menu;
     }
 
 }

@@ -25,6 +25,7 @@ Route::middleware('auth:api')->group(function (){
     Route::get('/user/menus','Api\UserController@getusermenus');
     Route::post('/user/edit','Api\UserController@edit');
     Route::post('/user/chpwd','Api\UserController@modifypwd');
+    Route::get('user/info','Api\UserController@info');
     Route::any('/user/logout','Api\UserController@logout');
 
     Route::post('/role/list','Api\RoleController@list');
