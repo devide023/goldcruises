@@ -292,10 +292,13 @@ class UserController extends Controller
                 $pwd = hash('sha256', $userpwd);
                 if ($pwd == $user->userpwd)
                 {
+                    $request['id']=$user->id;
+                    $menulist = $this->getusermenus($request);
                     return [
                         'code'  => 1,
                         'msg'   => "ok",
-                        'token' => $user->api_token
+                        'token' => $user->api_token,
+                        'menulist'=>$menulist
                     ];
                 } else
                 {
@@ -381,9 +384,12 @@ class UserController extends Controller
             ->join('menu', 'rolemenu.menuid', '=', 'menu.id')->select([
                 'menu.id',
                 'menu.pid',
-                'menu.menucode',
-                'menu.name',
+                'menu.menucode as code',
+                'menu.name as title',
                 'menu.menutype',
+                'menu.path',
+                'menu.viewpath',
+                'menu.icon',
             ])->get();
         return $menu;
     }

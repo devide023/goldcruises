@@ -55,6 +55,8 @@ class CreateUser extends Migration
             $table->string('icon',50)->comment('图标');
             $table->integer('status')->default(1)->comment('状态');
             $table->integer('adduserid')->comment('操作人');
+            $table->string('path',100)->nullable()->default(null)->comment('路由路径');
+            $table->string('viewpath',100)->nullable()->default(null)->comment('视图路径');
             $table->dateTime('addtime')->default(now())->comment('操作日期');
         });
 
