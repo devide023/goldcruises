@@ -48,7 +48,11 @@ class OrganizeController extends Controller
                     $request->jsrq . ' 23:59:59'
                 ]);
             });
-            return $query->paginate();
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $query->paginate()
+            ];
 
         } catch (Exception $exception)
         {
@@ -128,12 +132,13 @@ class OrganizeController extends Controller
     {
         try
         {
-            DB::transaction(function () use ($request){
+            DB::transaction(function () use ($request)
+            {
                 $org = Organize::find($request->id);
                 $org->users()->detach();
                 $org->delete();
             });
-                return $this->success();
+            return $this->success();
         } catch (Exception $exception)
         {
             throw  $exception;

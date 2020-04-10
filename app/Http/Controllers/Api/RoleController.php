@@ -15,7 +15,8 @@ class RoleController extends Controller
 
     public function list(Request $request)
     {
-        try {
+        try
+        {
             $query = Role::query();
             $query->when($request->name, function (Builder $q) use ($request)
             {
@@ -28,10 +29,14 @@ class RoleController extends Controller
                     $request->jsrq . ' 23:59:59'
                 ]);
             });
-            return $query->paginate();
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $query->paginate()
+            ];
 
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception)
+        {
             throw  $exception;
         }
 
@@ -39,7 +44,8 @@ class RoleController extends Controller
 
     public function add(Request $request)
     {
-        try {
+        try
+        {
             $role = Role::create([
                 'status'    => $request->status,
                 'name'      => $request->name,
@@ -47,14 +53,15 @@ class RoleController extends Controller
                 'note'      => $request->note,
                 'addtime'   => now()
             ]);
-            if ($role->id > 0) {
+            if ($role->id > 0)
+            {
                 return $this->success();
-            }
-            else {
+            } else
+            {
                 return $this->error();
             }
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception)
+        {
             throw  $exception;
         }
 
@@ -62,30 +69,33 @@ class RoleController extends Controller
 
     public function edit(Request $request)
     {
-        try {
+        try
+        {
             $roleid = $request->id;
             $role = Role::find($roleid);
-            if (is_null($role)) {
+            if (is_null($role))
+            {
                 return [
                     'code' => 0,
                     'msg'  => '参数不正确',
                 ];
-            }
-            else {
+            } else
+            {
                 $isok = $role->update([
                     'status' => $request->status,
                     'note'   => $request->note,
                     'name'   => $request->name,
                 ]);
-                if ($isok) {
+                if ($isok)
+                {
                     return $this->success();
-                }
-                else {
+                } else
+                {
                     return $this->error();
                 }
             }
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception)
+        {
             throw  $exception;
         }
 
@@ -93,19 +103,18 @@ class RoleController extends Controller
 
     public function del(Request $request)
     {
-        try {
+        try
+        {
             DB::transaction(function () use ($request)
             {
                 $role = Role::find($request->id);
-                $role->users()
-                    ->detach();
-                $role->menus()
-                    ->detach();
+                $role->users()->detach();
+                $role->menus()->detach();
                 $role->delete();
             });
             return $this->success();
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception)
+        {
             throw  $exception;
         }
 
@@ -113,46 +122,52 @@ class RoleController extends Controller
 
     public function roleuser(Request $request)
     {
-        try {
+        try
+        {
             $roleid = $request->id;
             $role = Role::find($roleid);
-            $role->users()
-                ->sync($request->userids);
+            $role->users()->sync($request->userids);
             return $this->success();
-        }
-        catch (Exception $exception) {
+        } catch (Exception $exception)
+        {
             throw  $exception;
         }
     }
 
     public function rolemenu(Request $request)
     {
-        try{
+        try
+        {
             $role = Role::find($request->id);
             $role->menus()->sync($request->menuids);
             return $this->success();
 
-        }catch (Exception $exception){
+        } catch (Exception $exception)
+        {
             throw  $exception;
         }
     }
 
     public function getusers(Request $request)
     {
-        try{
+        try
+        {
             $role = Role::find($request->id);
             return $role->users()->get();
-        }catch (Exception $exception){
+        } catch (Exception $exception)
+        {
 
         }
     }
 
     public function getmenus(Request $request)
     {
-        try{
+        try
+        {
             $role = Role::find($request->id);
             return $role->menus()->get();
-        }catch (Exception $exception){
+        } catch (Exception $exception)
+        {
 
         }
     }

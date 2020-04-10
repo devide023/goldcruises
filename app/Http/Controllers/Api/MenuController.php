@@ -42,7 +42,11 @@ class MenuController extends Controller
                     $request->jsrq . ' 23:59:59'
                 ]);
             });
-            return $query->paginate();
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $query->paginate()
+            ];
         } catch (Exception $exception)
         {
             throw  $exception;
@@ -120,12 +124,13 @@ class MenuController extends Controller
     {
         try
         {
-           DB::transaction(function () use ($request){
-               $menu = Menu::find($request->id);
-               $menu->delete();
-               $menu->roles()->detach();
-           });
-           return $this->success();
+            DB::transaction(function () use ($request)
+            {
+                $menu = Menu::find($request->id);
+                $menu->delete();
+                $menu->roles()->detach();
+            });
+            return $this->success();
         } catch (Exception $exception)
         {
             throw  $exception;
@@ -135,25 +140,28 @@ class MenuController extends Controller
 
     public function menuroles(Request $request)
     {
-        try{
+        try
+        {
             $menu = Menu::find($request->id);
             $menu->roles()->sync($request->roleids);
             return $this->success();
-        }catch (Exception $exception){
+        } catch (Exception $exception)
+        {
 
         }
     }
 
     public function getusers(Request $request)
     {
-        try{
-            $ids = DB::table('rolemenu')->where('rolemenu.menuid',$request->id)
-                ->join('roleuser','roleuser.roleid','=','rolemenu.roleid')
-                ->join('user','user.id','=','roleuser.userid')
-                ->select('user.id');
+        try
+        {
+            $ids = DB::table('rolemenu')->where('rolemenu.menuid', $request->id)
+                ->join('roleuser', 'roleuser.roleid', '=', 'rolemenu.roleid')
+                ->join('user', 'user.id', '=', 'roleuser.userid')->select('user.id');
 
-            return User::whereIn('id',$ids)->get();
-        }catch (Exception $exception){
+            return User::whereIn('id', $ids)->get();
+        } catch (Exception $exception)
+        {
 
         }
     }

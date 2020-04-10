@@ -43,7 +43,11 @@ class UserController extends Controller
             {
                 return $q->where('email', 'like', '%' . $request->email . '%');
             });
-            return $query->paginate();
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>$query->paginate()
+            ] ;
         } catch (Exception $exception)
         {
             throw  $exception;
