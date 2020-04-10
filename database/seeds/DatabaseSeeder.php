@@ -13,8 +13,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             //organizetable_seeder::class
-                     roletable_seeder::class,
+                     //roletable_seeder::class,
                     // userstable_seeder::class
+            funcode_seeder::class
         ]);
     }
 }

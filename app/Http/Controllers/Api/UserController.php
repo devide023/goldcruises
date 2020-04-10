@@ -394,7 +394,7 @@ class UserController extends Controller
                 'menu.path',
                 'menu.viewpath',
                 'menu.icon',
-            ])->get();
+            ])->where('menu.status','=',1)->get();
         return $menu;
     }
 
