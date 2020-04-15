@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Ramsey\Uuid\Uuid;
 
 class UserController extends Controller
 {
@@ -22,7 +23,24 @@ class UserController extends Controller
     {
         try
         {
+            $pagesize = $request->pagesize??15;
             $query = User::query();
+            $query->when(!is_null($request->key),function (Builder $q) use ($request){
+                return $q->where(function (Builder $s) use ($request) {
+                    return  $s->where('usercode','like','%'.$request->key.'%')
+                        ->orWhere('name','like','%'.$request->key.'%')
+                        ->orWhere('tel','like','%'.$request->key.'%')
+                        ->orWhere('adress','like','%'.$request->key.'%')
+                        ->orWhere('idno','like','%'.$request->key.'%')
+                        ->orWhere('email','like','%'.$request->key.'%')
+                        ;
+                });
+            } );
+            $query->when(!is_null($request->ksrq) && !is_null($request->jsrq),function (Builder $q) use ($request){
+                $v1 = $request->ksrq.' 0:0:0';
+                $v2  =$request->jsrq.' 23:59:59';
+               return $q->whereBetween('addtime',[$v1,$v2]);
+            });
             $query->when($request->username, function (Builder $q) use ($request)
             {
                 return $q->where('name', 'like', '%' . $request->username . '%');
@@ -43,10 +61,11 @@ class UserController extends Controller
             {
                 return $q->where('email', 'like', '%' . $request->email . '%');
             });
+            //var_dump($query->toSql());
             return [
                 'code'=>1,
                 'msg'=>'ok',
-                'result'=>$query->paginate()
+                'result'=>$query->paginate($pagesize)
             ] ;
         } catch (Exception $exception)
         {
@@ -368,6 +387,55 @@ class UserController extends Controller
             } else
             {
                 return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function upload_headimg(Request $request)
+    {
+        try
+        {
+            $file = $request->file('file');
+            if (! $file->isValid()) {
+                return [
+                    'code'=>0,
+                    'msg'=>'文件上传错误'
+                ];
+            }
+            $tmpFile = $file->getRealPath();
+            if (filesize($tmpFile) >= 2048000) {
+                return [
+                    'code'=>0,
+                    'msg'=>'文件超过2M!'
+                ];
+            }
+            $fileExtension = $file->clientExtension();
+            $filename = Uuid::uuid1()->getHex().'.'.$fileExtension;
+            if(! in_array($fileExtension, ['png', 'jpg', 'jpeg'])) {
+                return [
+                    'code'=>0,
+                    'msg'=>'非法的文件格式'
+                ];
+            }
+           $ok = Storage::disk('local')->put('/public/'.$filename,file_get_contents($tmpFile));
+            if($ok){
+                return [
+                    'code'=>1,
+                    'msg'=>'文件上传成功',
+                    'filename'=>$filename,
+                    'filepath'=>asset('/storage/'.$filename)
+                ];
+            } else{
+                return [
+                    'code'=>0,
+                    'msg'=>'文件上传失败',
+                    'filename'=>'',
+                    'filepath'=>'#'
+                ];
             }
         } catch (Exception $exception)
         {

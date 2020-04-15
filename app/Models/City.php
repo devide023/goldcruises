@@ -29,4 +29,5 @@ class City extends Model
     protected $guarded=[];
     public $timestamps=false;
     protected $casts=[];
+    protected $perPage=900;
 }

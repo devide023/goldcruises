@@ -21,9 +21,9 @@ class OrganizeController extends Controller
             {
                 return $q->where('id', $request->id);
             });
-            $query->when($request->pid, function (Builder $q) use ($request)
+            $query->when(!is_null($request->pid), function (Builder $q) use ($request)
             {
-                return $q->where('pid', $request->pid);
+                return $q->where('pid','=', $request->pid);
             });
             $query->when($request->name, function (Builder $q) use ($request)
             {
