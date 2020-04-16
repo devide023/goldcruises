@@ -23,23 +23,28 @@ class UserController extends Controller
     {
         try
         {
-            $pagesize = $request->pagesize??15;
+            $pagesize = $request->pagesize ?? 15;
             $query = User::query();
-            $query->when(!is_null($request->key),function (Builder $q) use ($request){
-                return $q->where(function (Builder $s) use ($request) {
-                    return  $s->where('usercode','like','%'.$request->key.'%')
-                        ->orWhere('name','like','%'.$request->key.'%')
-                        ->orWhere('tel','like','%'.$request->key.'%')
-                        ->orWhere('adress','like','%'.$request->key.'%')
-                        ->orWhere('idno','like','%'.$request->key.'%')
-                        ->orWhere('email','like','%'.$request->key.'%')
-                        ;
+            $query->when(!is_null($request->key), function (Builder $q) use ($request)
+            {
+                return $q->where(function (Builder $s) use ($request)
+                {
+                    return $s->where('usercode', 'like', '%' . $request->key . '%')
+                        ->orWhere('name', 'like', '%' . $request->key . '%')
+                        ->orWhere('tel', 'like', '%' . $request->key . '%')
+                        ->orWhere('adress', 'like', '%' . $request->key . '%')
+                        ->orWhere('idno', 'like', '%' . $request->key . '%')
+                        ->orWhere('email', 'like', '%' . $request->key . '%');
                 });
-            } );
-            $query->when(!is_null($request->ksrq) && !is_null($request->jsrq),function (Builder $q) use ($request){
-                $v1 = $request->ksrq.' 0:0:0';
-                $v2  =$request->jsrq.' 23:59:59';
-               return $q->whereBetween('addtime',[$v1,$v2]);
+            });
+            $query->when(!is_null($request->ksrq) && !is_null($request->jsrq), function (Builder $q) use ($request)
+            {
+                $v1 = $request->ksrq . ' 0:0:0';
+                $v2 = $request->jsrq . ' 23:59:59';
+                return $q->whereBetween('addtime', [
+                    $v1,
+                    $v2
+                ]);
             });
             $query->when($request->username, function (Builder $q) use ($request)
             {
@@ -63,10 +68,10 @@ class UserController extends Controller
             });
             //var_dump($query->toSql());
             return [
-                'code'=>1,
-                'msg'=>'ok',
-                'result'=>$query->paginate($pagesize)
-            ] ;
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $query->paginate($pagesize)
+            ];
         } catch (Exception $exception)
         {
             throw  $exception;
@@ -87,27 +92,40 @@ class UserController extends Controller
                     'result' => null
                 ];
             }
+            DB::beginTransaction();
             $user = User::create([
-                'status'    => $request->status,
-                'usercode'  => $request->usercode,
-                'sex'       => $request->sex,
-                'name'      => $request->username,
-                'userpwd'   => \hash('sha256', $request->password),
-                'birthdate' => $request->birthday,
-                'idno'      => $request->idno,
-                'tel'       => $request->tel,
-                'adress'    => $request->address,
-                'email'     => $request->email,
-                'province'  => $request->province,
-                'city'      => $request->city,
-                'district'  => $request->district,
-                'adduserid' => Auth::user()->id,
-                'addtime'   => now(),
-                'headimg'   => $request->headimg,
-                'api_token' => \hash('sha256', Str::random(50)),
-            ]);
+                    'status'    => $request->status,
+                    'usercode'  => $request->usercode,
+                    'sex'       => $request->sex,
+                    'name'      => $request->username,
+                    'userpwd'   => \hash('sha256', $request->password),
+                    'birthdate' => $request->birthday,
+                    'idno'      => $request->idno,
+                    'tel'       => $request->tel,
+                    'adress'    => $request->address,
+                    'email'     => $request->email,
+                    'province'  => $request->province,
+                    'city'      => $request->city,
+                    'district'  => $request->district,
+                    'adduserid' => Auth::user()->id,
+                    'addtime'   => now(),
+                    'headimg'   => $request->headimg,
+                    'api_token' => \hash('sha256', Str::random(50)),
+                ]);
+                $nodes = $request->organizeids;
+                foreach ($nodes as $node){
+                    $user->orgnodes()->attach($node[count($node)-1], [
+                        'adduserid' => Auth::id(),
+                        'addtime'   => now(),
+                        'main'      => 0,
+                        'companyid'=>$node[count($node)-2],
+                        'groupid'=>$node[0]
+                    ]);
+                }
+
             if ($user->id > 0)
             {
+                DB::commit();
                 return [
                     'code'   => 1,
                     'msg'    => 'ok',
@@ -115,6 +133,7 @@ class UserController extends Controller
                 ];
             } else
             {
+                DB::rollBack();
                 return [
                     'code'   => 0,
                     'msg'    => 'error',
@@ -149,9 +168,10 @@ class UserController extends Controller
         {
             $user = User::find($request->id);
             $orgids = $request->orgid;
-            $attr = ['main'      => 0,
-                     'adduserid' => Auth::user()->id,
-                     'addtime'   => now()
+            $attr = [
+                'main'      => 0,
+                'adduserid' => Auth::user()->id,
+                'addtime'   => now()
             ];
             $postdata = [];
             foreach ($orgids as $orgid)
@@ -315,13 +335,13 @@ class UserController extends Controller
                 $pwd = hash('sha256', $userpwd);
                 if ($pwd == $user->userpwd)
                 {
-                    $request['id']=$user->id;
+                    $request['id'] = $user->id;
                     $menulist = $this->getusermenus($request);
                     return [
-                        'code'  => 1,
-                        'msg'   => "ok",
-                        'token' => $user->api_token,
-                        'menulist'=>$menulist
+                        'code'     => 1,
+                        'msg'      => "ok",
+                        'token'    => $user->api_token,
+                        'menulist' => $menulist
                     ];
                 } else
                 {
@@ -346,25 +366,39 @@ class UserController extends Controller
 
     }
 
+    public function findbyid(Request $request)
+    {
+        try
+        {
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => User::find($request->id)
+            ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
     public function info(Request $request)
     {
         try
         {
-            $user = User::where('id',Auth::id())->select(
-              [
-                  'id',
-                  'name',
-                  'idno',
-                  'adress',
-                  'tel',
-                  'email',
-                  'headimg'
-              ]
-            )->first();
-            $user['headimg'] = asset('/storage/'.$user->headimg);
+            $user = User::where('id', Auth::id())->select([
+                'id',
+                'name',
+                'idno',
+                'adress',
+                'tel',
+                'email',
+                'headimg'
+            ])->first();
+            $user['headimg'] = asset('/storage/' . $user->headimg);
             return [
                 'code' => 1,
-                'user' =>$user
+                'user' => $user
             ];
         } catch (Exception $exception)
         {
@@ -400,41 +434,50 @@ class UserController extends Controller
         try
         {
             $file = $request->file('file');
-            if (! $file->isValid()) {
+            if (!$file->isValid())
+            {
                 return [
-                    'code'=>0,
-                    'msg'=>'文件上传错误'
+                    'code' => 0,
+                    'msg'  => '文件上传错误'
                 ];
             }
             $tmpFile = $file->getRealPath();
-            if (filesize($tmpFile) >= 2048000) {
+            if (filesize($tmpFile) >= 2048000)
+            {
                 return [
-                    'code'=>0,
-                    'msg'=>'文件超过2M!'
+                    'code' => 0,
+                    'msg'  => '文件超过2M!'
                 ];
             }
             $fileExtension = $file->clientExtension();
-            $filename = Uuid::uuid1()->getHex().'.'.$fileExtension;
-            if(! in_array($fileExtension, ['png', 'jpg', 'jpeg'])) {
+            $filename = Uuid::uuid1()->getHex() . '.' . $fileExtension;
+            if (!in_array($fileExtension, [
+                'png',
+                'jpg',
+                'jpeg'
+            ]))
+            {
                 return [
-                    'code'=>0,
-                    'msg'=>'非法的文件格式'
+                    'code' => 0,
+                    'msg'  => '非法的文件格式'
                 ];
             }
-           $ok = Storage::disk('local')->put('/public/'.$filename,file_get_contents($tmpFile));
-            if($ok){
+            $ok = Storage::disk('local')->put('/public/' . $filename, file_get_contents($tmpFile));
+            if ($ok)
+            {
                 return [
-                    'code'=>1,
-                    'msg'=>'文件上传成功',
-                    'filename'=>$filename,
-                    'filepath'=>asset('/storage/'.$filename)
+                    'code'     => 1,
+                    'msg'      => '文件上传成功',
+                    'filename' => $filename,
+                    'filepath' => asset('/storage/' . $filename)
                 ];
-            } else{
+            } else
+            {
                 return [
-                    'code'=>0,
-                    'msg'=>'文件上传失败',
-                    'filename'=>'',
-                    'filepath'=>'#'
+                    'code'     => 0,
+                    'msg'      => '文件上传失败',
+                    'filename' => '',
+                    'filepath' => '#'
                 ];
             }
         } catch (Exception $exception)
@@ -462,7 +505,7 @@ class UserController extends Controller
                 'menu.path',
                 'menu.viewpath',
                 'menu.icon',
-            ])->where('menu.status','=',1)->get();
+            ])->where('menu.status', '=', 1)->get();
         return $menu;
     }
 

@@ -27,6 +27,7 @@ Route::middleware('auth:api')->group(function (){
     Route::post('/user/chpwd','Api\UserController@modifypwd');
     Route::get('user/info','Api\UserController@info');
     Route::post('/user/headimg','Api\UserController@upload_headimg');
+    Route::get('/user/find','Api\UserController@findbyid');
     Route::any('/user/logout','Api\UserController@logout');
 
     Route::post('/role/list','Api\RoleController@list');
@@ -51,6 +52,7 @@ Route::middleware('auth:api')->group(function (){
     Route::post('/organize/edit','Api\OrganizeController@edit');
 
     Route::get('/baseinfo/province','Api\BaseInfoController@province' );
+    Route::get('/baseinfo/routes','Api\BaseInfoController@routelist' );
 
 });
 

@@ -73,9 +73,9 @@ class User extends \Illuminate\Foundation\Auth\User
     protected $with = [
         'sexname:code,name',
         'adduser:id,name',
-        'provincename:code,name',
-        'cityname:code,name',
-        'districtname:code,name'
+        'provincename:id,name',
+        'cityname:id,name',
+        'districtname:id,name'
     ];
 
     public function roles()
@@ -85,7 +85,7 @@ class User extends \Illuminate\Foundation\Auth\User
 
     public function orgnodes()
     {
-        return $this->belongsToMany('App\Models\Organize', 'userorg', 'userid', 'orgid');
+        return $this->belongsToMany('App\Models\Organize', 'userorg', 'userid', 'departmentid');
     }
 
     public function sexname()
@@ -100,16 +100,16 @@ class User extends \Illuminate\Foundation\Auth\User
 
     public function provincename()
     {
-        return $this->belongsTo('App\Models\City', 'province', 'code');
+        return $this->belongsTo('App\Models\City', 'province', 'id');
     }
 
     public function cityname()
     {
-        return $this->belongsTo('App\Models\City', 'city', 'code');
+        return $this->belongsTo('App\Models\City', 'city', 'id');
     }
 
     public function districtname()
     {
-        return $this->belongsTo('App\Models\City', 'district', 'code');
+        return $this->belongsTo('App\Models\City', 'district', 'id');
     }
 }

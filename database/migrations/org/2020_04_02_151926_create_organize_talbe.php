@@ -32,7 +32,9 @@ class CreateOrganizeTalbe extends Migration
         {
             $table->bigIncrements('id');
             $table->integer('userid')->nullable()->default(null)->comment('用户id');
-            $table->integer('orgid')->nullable()->default(null)->comment('组织节点id');
+            $table->integer('groupid')->nullable()->default(null)->comment('集团节点id');
+            $table->integer('companyid')->nullable()->default(null)->comment('公司节点id');
+            $table->integer('departmentid')->nullable()->default(null)->comment('部门节点id');
             $table->integer('main')->nullable()->default(0)->comment('主节点');
             $table->integer('adduserid')->nullable()->default(null)->comment('操作人');
             $table->dateTime('addtime')->nullable()->default(now())->comment('操作时间');
