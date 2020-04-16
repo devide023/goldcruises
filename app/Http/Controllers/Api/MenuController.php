@@ -16,12 +16,21 @@ class MenuController extends Controller
 
     public function list(Request $request)
     {
-        try
-        {
+        try {
+            $pagesize = $request->pagesize ?? 15;
             $query = Menu::query();
-            $query->when($request->pid, function (Builder $q) use ($request)
+            $query->when(!is_null($request->pid), function (Builder $q) use ($request)
             {
                 return $q->where('pid', $request->pid);
+            });
+            $query->when(!is_null($request->key), function (Builder $q) use ($request)
+            {
+                return $q->where(function (Builder $s) use ($request)
+                {
+                    return $s->where('name', 'like', '%' . $request->key . '%')
+                        ->orWhere('menucode', 'like', '%' . $request->key . '%')
+                        ->orWhere('menutype', 'like', '%' . $request->key . '%');
+                });
             });
             $query->when($request->name, function (Builder $q) use ($request)
             {
@@ -45,10 +54,10 @@ class MenuController extends Controller
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $query->paginate()
+                'result' => $query->paginate($pagesize)
             ];
-        } catch (Exception $exception)
-        {
+        }
+        catch (Exception $exception) {
             throw  $exception;
         }
 
@@ -56,8 +65,7 @@ class MenuController extends Controller
 
     public function add(Request $request)
     {
-        try
-        {
+        try {
             $menu = Menu::create([
                 'pid'       => $request->pid,
                 'name'      => $request->name,
@@ -68,15 +76,14 @@ class MenuController extends Controller
                 'addtime'   => now(),
                 'status'    => $request->status
             ]);
-            if ($menu->id > 0)
-            {
+            if ($menu->id > 0) {
                 return $this->success();
-            } else
-            {
+            }
+            else {
                 return $this->error();
             }
-        } catch (Exception $exception)
-        {
+        }
+        catch (Exception $exception) {
             throw  $exception;
         }
 
@@ -84,11 +91,9 @@ class MenuController extends Controller
 
     public function edit(Request $request)
     {
-        try
-        {
+        try {
             $menu = Menu::find($request->id);
-            if (!is_null($menu))
-            {
+            if (!is_null($menu)) {
                 $isok = $menu->update([
                     'status'   => $request->status,
                     'pid'      => $request->pid,
@@ -97,15 +102,14 @@ class MenuController extends Controller
                     'menutype' => $request->menutype,
                     'icon'     => $request->icon,
                 ]);
-                if ($isok)
-                {
+                if ($isok) {
                     return $this->success();
-                } else
-                {
+                }
+                else {
                     return $this->error();
                 }
-            } else
-            {
+            }
+            else {
                 return [
                     'code' => 0,
                     'msg'  => '参数错误',
@@ -113,8 +117,8 @@ class MenuController extends Controller
             }
 
 
-        } catch (Exception $exception)
-        {
+        }
+        catch (Exception $exception) {
             throw  $exception;
         }
 
@@ -122,17 +126,17 @@ class MenuController extends Controller
 
     public function del(Request $request)
     {
-        try
-        {
+        try {
             DB::transaction(function () use ($request)
             {
                 $menu = Menu::find($request->id);
                 $menu->delete();
-                $menu->roles()->detach();
+                $menu->roles()
+                    ->detach();
             });
             return $this->success();
-        } catch (Exception $exception)
-        {
+        }
+        catch (Exception $exception) {
             throw  $exception;
         }
 
@@ -140,28 +144,30 @@ class MenuController extends Controller
 
     public function menuroles(Request $request)
     {
-        try
-        {
+        try {
             $menu = Menu::find($request->id);
-            $menu->roles()->sync($request->roleids);
+            $menu->roles()
+                ->sync($request->roleids);
             return $this->success();
-        } catch (Exception $exception)
-        {
+        }
+        catch (Exception $exception) {
 
         }
     }
 
     public function getusers(Request $request)
     {
-        try
-        {
-            $ids = DB::table('rolemenu')->where('rolemenu.menuid', $request->id)
+        try {
+            $ids = DB::table('rolemenu')
+                ->where('rolemenu.menuid', $request->id)
                 ->join('roleuser', 'roleuser.roleid', '=', 'rolemenu.roleid')
-                ->join('user', 'user.id', '=', 'roleuser.userid')->select('user.id');
+                ->join('user', 'user.id', '=', 'roleuser.userid')
+                ->select('user.id');
 
-            return User::whereIn('id', $ids)->get();
-        } catch (Exception $exception)
-        {
+            return User::whereIn('id', $ids)
+                ->get();
+        }
+        catch (Exception $exception) {
 
         }
     }
