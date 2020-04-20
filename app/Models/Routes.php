@@ -33,4 +33,8 @@ class Routes extends Model
     public $timestamps=false;
     protected $guarded=[];
     protected $casts=[];
+    protected $with=['adduser:id,name'];
+    public function adduser(){
+        return $this->belongsTo('App\Models\User','adduserid','id');
+    }
 }

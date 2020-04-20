@@ -56,6 +56,7 @@ Route::middleware('auth:api')->group(function (){
     Route::post('/organize/edit','Api\OrganizeController@edit');
 
     Route::get('/baseinfo/province','Api\BaseInfoController@province' );
+    Route::get('/baseinfo/freshroute','Api\BaseInfoController@freshroute');
     Route::get('/baseinfo/routes','Api\BaseInfoController@routelist' );
     Route::get('/baseinfo/icons','Api\BaseInfoController@icons');
     Route::get('/baseinfo/funcodes','Api\BaseInfoController@funcods');
