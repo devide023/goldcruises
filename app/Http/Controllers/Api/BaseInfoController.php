@@ -47,6 +47,7 @@ class BaseInfoController extends Controller
         try
         {
             $list = [];
+            $res=[];
             $routes = Route::getRoutes();
             foreach ($routes as $route)
             {
@@ -55,13 +56,16 @@ class BaseInfoController extends Controller
                     'method' => $route->methods[0]
                 ]);
             }
+            collect($list)->filter(function ($i)
+            {
+                return Str::startsWith($i['url'], 'api/');
+            })->each(function ($item) use (&$res){
+                array_push($res,$item);
+            });
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => collect($list)->filter(function ($i)
-                {
-                    return Str::startsWith($i['url'], 'api/');
-                })
+                'result' => $res
             ];
         } catch (Exception $exception)
         {
