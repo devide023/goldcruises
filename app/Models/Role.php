@@ -42,6 +42,11 @@ class Role extends Model
     public function users(){
         return $this->belongsToMany('App\Models\User','roleuser','roleid','userid');
     }
+
+    public function routes(){
+        return $this->belongsToMany('App\Models\Routes','roleroute','roleid','routeid');
+    }
+
     public function adduser(){
         return $this->belongsTo('App\Models\User','adduserid','id');
     }
