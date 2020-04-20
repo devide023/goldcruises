@@ -52,7 +52,7 @@ class CreateUser extends Migration
             $table->string('name',100)->comment('菜单名称');
             $table->string('menucode',50)->comment('菜单编码');
             $table->string('menutype',10)->comment('菜单类型');
-            $table->string('icon',50)->comment('图标');
+            $table->string('icon',50)->nullable()->default(null)->comment('图标');
             $table->integer('status')->default(1)->comment('状态');
             $table->integer('adduserid')->comment('操作人');
             $table->string('path',100)->nullable()->default(null)->comment('路由路径');

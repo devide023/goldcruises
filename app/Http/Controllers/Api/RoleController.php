@@ -46,6 +46,7 @@ class RoleController extends Controller
     {
         try
         {
+            DB::beginTransaction();
             $role = Role::create([
                 'status'    => $request->status,
                 'name'      => $request->name,
@@ -53,11 +54,15 @@ class RoleController extends Controller
                 'note'      => $request->note,
                 'addtime'   => now()
             ]);
+            $role->users()->attach($request->userids);
+            $role->routes()->attach($request->routeids);
             if ($role->id > 0)
             {
+                DB::commit();
                 return $this->success();
             } else
             {
+                DB::rollBack();
                 return $this->error();
             }
         } catch (Exception $exception)

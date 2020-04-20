@@ -31,4 +31,9 @@ class FunCode extends Model
     protected $guarded=[];
     public $timestamps=false;
     protected $casts=[];
+    protected $with=['adduser:id,name'];
+
+    public function adduser(){
+        return $this->belongsTo('App\Models\User','adduserid','id');
+    }
 }
