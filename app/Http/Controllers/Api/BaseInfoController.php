@@ -50,13 +50,13 @@ class BaseInfoController extends Controller
         try
         {
             $routes = Route::getRoutes();
-            $list=[];
+            $list = [];
             Routes::truncate();
             foreach ($routes as $route)
             {
                 if (Str::startsWith($route->uri, 'api/'))
                 {
-                    array_push($list,['url'=>$route->uri]);
+                    array_push($list, ['url' => $route->uri]);
                     $cnt = Routes::where('route', $route->uri)->count();
                     if ($cnt == 0)
                     {
@@ -73,9 +73,9 @@ class BaseInfoController extends Controller
             if (count($list) == Routes::count())
             {
                 return [
-                    'code'=>1,
-                    'msg'=>'ok',
-                    'result'=>Routes::all()
+                    'code'   => 1,
+                    'msg'    => 'ok',
+                    'result' => Routes::all()
                 ];
             } else
             {
@@ -158,6 +158,56 @@ class BaseInfoController extends Controller
                 'msg'    => 'ok',
                 'result' => $query->get()
             ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function addfuncode(Request $request)
+    {
+        try
+        {
+            $cnt = FunCode::where('code',$request->code)->count();
+            if($cnt==0){
+                $funcode = FunCode::create([
+                    'code' => $request->code,
+                    'name'=>$request->name,
+                    'status' => 1,
+                    'addtime' => now(),
+                    'adduserid' => Auth::id()
+                ]);
+                if($funcode->id>0){
+                    return $this->success();
+                }else{
+                    return $this->error();
+                }
+            }else{
+                return [
+                  'code'=>0,
+                  'msg'=>'功能编码重复',
+                ];
+            }
+
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function delfuncode(Request $request)
+    {
+        try
+        {
+           $ret = FunCode::where('code',$request->code)->delete();
+           if($ret){
+               return $this->success();
+           }
+           else{
+               return $this->error();
+           }
         } catch (Exception $exception)
         {
             throw  $exception;

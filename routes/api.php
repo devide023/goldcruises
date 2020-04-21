@@ -60,6 +60,8 @@ Route::middleware('auth:api')->group(function (){
     Route::get('/baseinfo/routes','Api\BaseInfoController@routelist' );
     Route::get('/baseinfo/icons','Api\BaseInfoController@icons');
     Route::get('/baseinfo/funcodes','Api\BaseInfoController@funcods');
+    Route::post('/baseinfo/addfuncode','Api\BaseInfoController@addfuncode');
+    Route::get('/baseinfo/delfuncode','Api\BaseInfoController@delfuncode');
     Route::get('/baseinfo/menutypelist','Api\BaseInfoController@menutypelist');
 
 });
