@@ -28,6 +28,9 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Role whereNote($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Role whereStatus($value)
  * @mixin \Eloquent
+ * @property-read \App\Models\User $adduser
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Routes[] $routes
+ * @property-read int|null $routes_count
  */
 class Role extends Model
 {
@@ -38,6 +41,7 @@ class Role extends Model
     protected $casts=[];
     protected $with = [
       'adduser:id,name',
+      'users','routes','menus'
     ];
     public function users(){
         return $this->belongsToMany('App\Models\User','roleuser','roleid','userid');

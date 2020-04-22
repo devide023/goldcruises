@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Menu;
 use App\Models\Role;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -54,8 +56,10 @@ class RoleController extends Controller
                 'note'      => $request->note,
                 'addtime'   => now()
             ]);
-            $role->users()->attach($request->userids);
-            $role->routes()->attach($request->routeids);
+            $menuids = collect($request->menuids)->collapse()->unique();
+            $role->menus()->sync($menuids);
+            $role->users()->sync($request->userids);
+            $role->routes()->sync($request->routeids);
             if ($role->id > 0)
             {
                 DB::commit();
@@ -86,16 +90,23 @@ class RoleController extends Controller
                 ];
             } else
             {
+                $menuids = collect($request->menuids)->collapse()->unique();
+                DB::beginTransaction();
+                $role->menus()->sync($menuids);
+                $role->routes()->sync($request->routeids);
+                $role->users()->sync($request->userids);
                 $isok = $role->update([
                     'status' => $request->status,
                     'note'   => $request->note,
-                    'name'   => $request->name,
+                    'name'   => $request->name
                 ]);
                 if ($isok)
                 {
+                    DB::commit();
                     return $this->success();
                 } else
                 {
+                    DB::rollBack();
                     return $this->error();
                 }
             }
@@ -153,6 +164,29 @@ class RoleController extends Controller
         }
     }
 
+    public function rolemenupath(Request $request)
+    {
+        try
+        {
+            $res=[];
+            $role = Role::find($request->id);
+            $menus = $role->menus->where('menutype','=','03');
+            foreach ($menus as $menu){
+                $root = Menu::find($menu->pid);
+                array_push($res,[$root->pid,$menu->pid,$menu->id]);
+            }
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>$res
+            ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
     public function getusers(Request $request)
     {
         try
@@ -175,6 +209,24 @@ class RoleController extends Controller
         {
 
         }
+    }
+
+    public function getrolerel(Request $request)
+    {
+        try
+        {
+            $role = Role::find($request->id);
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>$role
+            ];
+
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
     }
 
 }

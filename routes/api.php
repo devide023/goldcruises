@@ -38,6 +38,8 @@ Route::middleware('auth:api')->group(function (){
     Route::post('/role/rolemenu','Api\RoleController@rolemenu');
     Route::get('/role/users','Api\RoleController@getusers');
     Route::get('/role/menus','Api\RoleController@getmenus');
+    Route::get('/role/rolerel','Api\RoleController@getrolerel');
+    Route::get('/role/rolemenupath','Api\RoleController@rolemenupath');
 
     Route::post('/menu/list','Api\MenuController@list');
     Route::post('/menu/add','Api\MenuController@add');
