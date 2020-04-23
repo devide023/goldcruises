@@ -23,6 +23,7 @@ Route::middleware('auth:api')->group(function (){
     Route::post('/user/userrole','Api\UserController@userroles');
     Route::post('/user/userorg','Api\UserController@userorgs');
     Route::get('/user/menus','Api\UserController@getusermenus');
+    Route::get('/user/routes','Api\UserController@userroutes');
     Route::post('/user/edit','Api\UserController@edit');
     Route::post('/user/chpwd','Api\UserController@modifypwd');
     Route::get('user/info','Api\UserController@info');

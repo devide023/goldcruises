@@ -556,4 +556,21 @@ class UserController extends Controller
         return $menu;
     }
 
+    /***
+     * @param Request $request
+     * 获取用户路由表
+     */
+    public function userroutes(Request $request)
+    {
+        try
+        {
+
+
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
 }

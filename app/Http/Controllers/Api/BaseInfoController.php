@@ -51,7 +51,6 @@ class BaseInfoController extends Controller
         {
             $routes = Route::getRoutes();
             $list = [];
-            Routes::truncate();
             foreach ($routes as $route)
             {
                 if (Str::startsWith($route->uri, 'api/'))
