@@ -80,26 +80,34 @@ class MenuController extends Controller
                 $cnt = [];
                 foreach ($codes as $code)
                 {
-                    $menu = Menu::create([
-                        'pid'       => $request->pid,
-                        'name'      => $code,
-                        'menucode'  => $mcode,
-                        'menutype'  => $request->menutype,
-                        'adduserid' => Auth::user()->id,
-                        'addtime'   => now(),
-                        'status'    => $request->status
-                    ]);
-                    $lastint++;
-                    $lastcode = str_pad($lastint, 2, '0', STR_PAD_LEFT);
-                    $mcode = $temp[count($temp) - 3] . $temp[count($temp) - 2] . $lastcode;
-                    array_push($cnt, $menu);
+                    $has = Menu::where('name', $code)->where('pid', $request->pid)->where('menutype', '=', '03')
+                        ->count();
+                    if ($has == 0)
+                    {
+                        $menu = Menu::create([
+                            'pid'       => $request->pid,
+                            'name'      => $code,
+                            'menucode'  => $mcode,
+                            'menutype'  => $request->menutype,
+                            'adduserid' => Auth::user()->id,
+                            'addtime'   => now(),
+                            'status'    => $request->status
+                        ]);
+                        $lastint++;
+                        $lastcode = str_pad($lastint, 2, '0', STR_PAD_LEFT);
+                        $mcode = $temp[count($temp) - 3] . $temp[count($temp) - 2] . $lastcode;
+                        array_push($cnt, $menu);
+                    }
                 }
                 if (count($cnt) == count($codes))
                 {
                     return $this->success();
                 } else
                 {
-                    return $this->error();
+                    return [
+                        'code'=>0,
+                        'msg'=>'功能简码已存在'
+                    ];
                 }
 
             } else
@@ -220,13 +228,12 @@ class MenuController extends Controller
     {
         try
         {
-            $ok = Menu::whereIn('id',$request->ids)
-                ->where('status',1)
-                ->update(['status'=>0]);
-            if($ok){
+            $ok = Menu::whereIn('id', $request->ids)->where('status', 1)->update(['status' => 0]);
+            if ($ok)
+            {
                 return $this->success();
-            }
-            else{
+            } else
+            {
                 return $this->error();
             }
         } catch (Exception $exception)
@@ -240,13 +247,12 @@ class MenuController extends Controller
     {
         try
         {
-            $ok = Menu::whereIn('id',$request->ids)
-                ->where('status',0)
-                ->update(['status'=>1]);
-            if($ok){
+            $ok = Menu::whereIn('id', $request->ids)->where('status', 0)->update(['status' => 1]);
+            if ($ok)
+            {
                 return $this->success();
-            }
-            else{
+            } else
+            {
                 return $this->error();
             }
 
@@ -261,15 +267,16 @@ class MenuController extends Controller
     {
         try
         {
-            $query = Menu::where('status',1)
-                ->where('menutype','03')
-                ->where('pid',$request->id);
-            $search = FunCode::joinSub($query,'ta','funcode.code','=','ta.name')
-                ->select(['funcode.code','funcode.name','funcode.id']);
+            $query = Menu::where('status', 1)->where('menutype', '03')->where('pid', $request->id);
+            $search = FunCode::joinSub($query, 'ta', 'funcode.code', '=', 'ta.name')->select([
+                    'funcode.code',
+                    'funcode.name',
+                    'funcode.id'
+                ]);
             return [
-              'code'=>1,
-              'msg'=>'ok',
-              'result'=>$search->get()
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $search->get()
             ];
         } catch (Exception $exception)
         {
@@ -278,17 +285,19 @@ class MenuController extends Controller
 
     }
 
-    private  function checkcodeexsit($code){
-       $is_exsit = Menu::where('menucode',$code)->count();
-       if($is_exsit==0){
-           return $code;
-       }else
-       {
-           $last = (int)substr($code,-2);
-           $last = $last +1;
-           $newcode = substr($code,0,strlen($code) - 2).str_pad($last,2,'0',STR_PAD_LEFT);
-           return $this->checkcodeexsit($newcode);
-       }
+    private function checkcodeexsit($code)
+    {
+        $is_exsit = Menu::where('menucode', $code)->count();
+        if ($is_exsit == 0)
+        {
+            return $code;
+        } else
+        {
+            $last = (int)substr($code, -2);
+            $last = $last + 1;
+            $newcode = substr($code, 0, strlen($code) - 2) . str_pad($last, 2, '0', STR_PAD_LEFT);
+            return $this->checkcodeexsit($newcode);
+        }
     }
 
     public function maxmenucode(Request $request)

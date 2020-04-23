@@ -28,6 +28,8 @@ Route::middleware('auth:api')->group(function (){
     Route::get('user/info','Api\UserController@info');
     Route::post('/user/headimg','Api\UserController@upload_headimg');
     Route::get('/user/find','Api\UserController@findbyid');
+    Route::post('/user/disable','Api\UserController@disable');
+    Route::post('/user/enable','Api\UserController@enable');
     Route::any('/user/logout','Api\UserController@logout');
 
     Route::post('/role/list','Api\RoleController@list');
