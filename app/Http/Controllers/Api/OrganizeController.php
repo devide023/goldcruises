@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Code\Utils;
 use App\Http\Controllers\Controller;
 use App\Models\Organize;
+use App\Models\OrganizeType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 
 class OrganizeController extends Controller
 {
+    use Utils;
+
     //
     public function list(Request $request)
     {
@@ -23,7 +27,7 @@ class OrganizeController extends Controller
             });
             $query->when(!is_null($request->pid), function (Builder $q) use ($request)
             {
-                return $q->where('pid','=', $request->pid);
+                return $q->where('pid', '=', $request->pid);
             });
             $query->when($request->name, function (Builder $q) use ($request)
             {
@@ -121,6 +125,83 @@ class OrganizeController extends Controller
                 ];
             }
 
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function saveallorg(Request $request)
+    {
+        try
+        {
+            $orgs = $request->orgtree;
+            return [
+                'code'   => 1,
+                'result' => $orgs
+            ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function alltree(Request $request)
+    {
+        try
+        {
+            $pid = $request->id ?? 0;
+            $nodes = $this->get_org_all_tree($pid);
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $nodes
+            ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    /**
+     * @param Request $request
+     * 获取当前节点下的子节点
+     */
+    public function curentnodes(Request $request)
+    {
+        try
+        {
+            $nodes = Organize::where('pid', $request->id)->select([
+                'id',
+                'pid',
+                'name as label',
+                'orgcode',
+                'orgtype'
+            ])->get();
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $nodes
+            ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+    }
+
+    public function find(Request $request)
+    {
+        try
+        {
+            $org = Organize::find($request->id);
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $org
+            ];
         } catch (Exception $exception)
         {
             throw  $exception;

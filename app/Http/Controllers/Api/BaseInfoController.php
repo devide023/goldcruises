@@ -7,6 +7,7 @@ use App\Models\City;
 use App\Models\FunCode;
 use App\Models\Icon;
 use App\Models\MenuType;
+use App\Models\OrganizeType;
 use App\Models\Routes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -113,6 +114,23 @@ class BaseInfoController extends Controller
                 'msg'    => 'ok',
                 'result' => MenuType::all()
             ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function orgtypes(Request $request)
+    {
+        try
+        {
+           $types = OrganizeType::all();
+           return [
+             'code'=>1,
+             'msg'=>'ok',
+             'result'=>$types
+           ];
         } catch (Exception $exception)
         {
             throw  $exception;

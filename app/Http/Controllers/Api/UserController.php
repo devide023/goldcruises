@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Code\Utils;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use App\Models\Role;
@@ -18,6 +19,7 @@ use Ramsey\Uuid\Uuid;
 
 class UserController extends Controller
 {
+    use Utils;
 
     public function list(Request $request)
     {
@@ -564,7 +566,12 @@ class UserController extends Controller
     {
         try
         {
-
+           $route = $this->get_current_user_route();
+           return [
+               'code'=>1,
+               'msg'=>'ok',
+               'result'=>$route
+           ];
 
         } catch (Exception $exception)
         {

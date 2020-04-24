@@ -57,8 +57,13 @@ Route::middleware('auth:api')->group(function (){
 
     Route::post('/organize/list','Api\OrganizeController@list');
     Route::post('/organize/add','Api\OrganizeController@add');
+    Route::post('/organize/saveallorg','Api\OrganizeController@saveallorg');
     Route::get('/organize/del','Api\OrganizeController@del');
+    Route::get('/organize/find','Api\OrganizeController@find');
     Route::post('/organize/edit','Api\OrganizeController@edit');
+    Route::get('/organize/curentnodes','Api\OrganizeController@curentnodes');
+    Route::get('/organize/alltree','Api\OrganizeController@alltree');
+
 
     Route::get('/baseinfo/province','Api\BaseInfoController@province' );
     Route::get('/baseinfo/freshroute','Api\BaseInfoController@freshroute');
@@ -68,6 +73,7 @@ Route::middleware('auth:api')->group(function (){
     Route::post('/baseinfo/addfuncode','Api\BaseInfoController@addfuncode');
     Route::get('/baseinfo/delfuncode','Api\BaseInfoController@delfuncode');
     Route::get('/baseinfo/menutypelist','Api\BaseInfoController@menutypelist');
+    Route::get('/baseinfo/orgtypes','Api\BaseInfoController@orgtypes');
 
 });
 
