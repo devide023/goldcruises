@@ -179,6 +179,26 @@ class OrganizeController extends Controller
 
     }
 
+    public function edited_node(Request $request)
+    {
+        try
+        {
+            $node = $request->data;
+            $cnt = Organize::where('id',$node['id'])->update([
+                'name'=>$node['label'],
+            ]);
+            if($cnt>0){
+                return $this->success();
+            }else{
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
     public function remove_node(Request $request)
     {
         try
@@ -243,7 +263,7 @@ class OrganizeController extends Controller
             DB::commit();
             return [
                 'code'   => 1,
-                'msg'    => 'ok',
+                'msg'    => '数据保存成功',
                 'result' => $this->alltree($request)
             ];
         } catch (Exception $exception)

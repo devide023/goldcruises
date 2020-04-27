@@ -40,7 +40,7 @@ trait Utils
                 'parentid'=>$subnode->pid,
                 'label'=>$subnode->name,
                 'orgtype'=>$subnode->orgtype,
-                'orgcode'=>$subnode->orgtcode,
+                'orgcode'=>$subnode->orgcode,
                 'isedit'=>false,
             ];
             if($has>0){
@@ -68,7 +68,7 @@ trait Utils
                     'parentid'=>$rootnode->pid,
                     'label'=>$rootnode->name,
                     'orgtype'=>$rootnode->orgtype,
-                    'orgcode'=>$rootnode->orgtcode,
+                    'orgcode'=>$rootnode->orgcode,
                     'isedit'=>false,
                 ];
                 if($has>0){

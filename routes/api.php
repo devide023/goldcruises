@@ -60,6 +60,7 @@ Route::middleware('auth:api')->group(function (){
     Route::post('/organize/saveallorg','Api\OrganizeController@saveallorg');
     Route::get('/organize/create_node','Api\OrganizeController@create_node');
     Route::get('/organize/remove_node','Api\OrganizeController@remove_node');
+    Route::post('/organize/edited_node','Api\OrganizeController@edited_node');
     Route::get('/organize/del','Api\OrganizeController@del');
     Route::get('/organize/find','Api\OrganizeController@find');
     Route::post('/organize/edit','Api\OrganizeController@edit');
