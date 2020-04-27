@@ -7,6 +7,7 @@ use App\Models\City;
 use App\Models\FunCode;
 use App\Models\Icon;
 use App\Models\MenuType;
+use App\Models\OrganizeType;
 use App\Models\Routes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -50,13 +51,12 @@ class BaseInfoController extends Controller
         try
         {
             $routes = Route::getRoutes();
-            $list=[];
-            Routes::truncate();
+            $list = [];
             foreach ($routes as $route)
             {
                 if (Str::startsWith($route->uri, 'api/'))
                 {
-                    array_push($list,['url'=>$route->uri]);
+                    array_push($list, ['url' => $route->uri]);
                     $cnt = Routes::where('route', $route->uri)->count();
                     if ($cnt == 0)
                     {
@@ -73,9 +73,9 @@ class BaseInfoController extends Controller
             if (count($list) == Routes::count())
             {
                 return [
-                    'code'=>1,
-                    'msg'=>'ok',
-                    'result'=>Routes::all()
+                    'code'   => 1,
+                    'msg'    => 'ok',
+                    'result' => Routes::all()
                 ];
             } else
             {
@@ -121,6 +121,23 @@ class BaseInfoController extends Controller
 
     }
 
+    public function orgtypes(Request $request)
+    {
+        try
+        {
+           $types = OrganizeType::all();
+           return [
+             'code'=>1,
+             'msg'=>'ok',
+             'result'=>$types
+           ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
     public function icons(Request $request)
     {
         try
@@ -158,6 +175,56 @@ class BaseInfoController extends Controller
                 'msg'    => 'ok',
                 'result' => $query->get()
             ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function addfuncode(Request $request)
+    {
+        try
+        {
+            $cnt = FunCode::where('code',$request->code)->count();
+            if($cnt==0){
+                $funcode = FunCode::create([
+                    'code' => $request->code,
+                    'name'=>$request->name,
+                    'status' => 1,
+                    'addtime' => now(),
+                    'adduserid' => Auth::id()
+                ]);
+                if($funcode->id>0){
+                    return $this->success();
+                }else{
+                    return $this->error();
+                }
+            }else{
+                return [
+                  'code'=>0,
+                  'msg'=>'功能编码重复',
+                ];
+            }
+
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function delfuncode(Request $request)
+    {
+        try
+        {
+           $ret = FunCode::where('code',$request->code)->delete();
+           if($ret){
+               return $this->success();
+           }
+           else{
+               return $this->error();
+           }
         } catch (Exception $exception)
         {
             throw  $exception;

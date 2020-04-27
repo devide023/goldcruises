@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Code\Utils;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
 use App\Models\Role;
@@ -18,6 +19,7 @@ use Ramsey\Uuid\Uuid;
 
 class UserController extends Controller
 {
+    use Utils;
 
     public function list(Request $request)
     {
@@ -94,34 +96,35 @@ class UserController extends Controller
             }
             DB::beginTransaction();
             $user = User::create([
-                    'status'    => $request->status,
-                    'usercode'  => $request->usercode,
-                    'sex'       => $request->sex,
-                    'name'      => $request->username,
-                    'userpwd'   => \hash('sha256', $request->password),
-                    'birthdate' => $request->birthday,
-                    'idno'      => $request->idno,
-                    'tel'       => $request->tel,
-                    'adress'    => $request->address,
-                    'email'     => $request->email,
-                    'province'  => $request->province,
-                    'city'      => $request->city,
-                    'district'  => $request->district,
-                    'adduserid' => Auth::user()->id,
+                'status'    => $request->status,
+                'usercode'  => $request->usercode,
+                'sex'       => $request->sex,
+                'name'      => $request->username,
+                'userpwd'   => \hash('sha256', $request->password),
+                'birthdate' => $request->birthday,
+                'idno'      => $request->idno,
+                'tel'       => $request->tel,
+                'adress'    => $request->address,
+                'email'     => $request->email,
+                'province'  => $request->province,
+                'city'      => $request->city,
+                'district'  => $request->district,
+                'adduserid' => Auth::user()->id,
+                'addtime'   => now(),
+                'headimg'   => $request->headimg,
+                'api_token' => \hash('sha256', Str::random(50)),
+            ]);
+            $nodes = $request->organizeids;
+            foreach ($nodes as $node)
+            {
+                $user->orgnodes()->attach($node[count($node) - 1], [
+                    'adduserid' => Auth::id(),
                     'addtime'   => now(),
-                    'headimg'   => $request->headimg,
-                    'api_token' => \hash('sha256', Str::random(50)),
+                    'main'      => 0,
+                    'companyid' => $node[count($node) - 2],
+                    'groupid'   => $node[0]
                 ]);
-                $nodes = $request->organizeids;
-                foreach ($nodes as $node){
-                    $user->orgnodes()->attach($node[count($node)-1], [
-                        'adduserid' => Auth::id(),
-                        'addtime'   => now(),
-                        'main'      => 0,
-                        'companyid'=>$node[count($node)-2],
-                        'groupid'=>$node[0]
-                    ]);
-                }
+            }
 
             if ($user->id > 0)
             {
@@ -335,13 +338,11 @@ class UserController extends Controller
                 $pwd = hash('sha256', $userpwd);
                 if ($pwd == $user->userpwd)
                 {
-                    $request['id'] = $user->id;
-                    $menulist = $this->getusermenus($request);
                     return [
-                        'code'     => 1,
-                        'msg'      => "ok",
-                        'token'    => $user->api_token,
-                        'menulist' => $menulist
+                        'code'  => 1,
+                        'msg'   => "ok",
+                        'token' => $user->api_token
+
                     ];
                 } else
                 {
@@ -382,6 +383,51 @@ class UserController extends Controller
 
     }
 
+    public function enable(Request $request)
+    {
+        try
+        {
+            $users = User::where('status', '=', 0)->whereIn('id', $request->ids);
+            $cnt = $users->update([
+                'status' => 1
+            ]);
+            if ($cnt > 0)
+            {
+                return $this->success();
+            } else
+            {
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function disable(Request $request)
+    {
+        try
+        {
+            $users = User::where('status', '=', 1)->whereIn('id', $request->ids);
+            $cnt = $users->update([
+                'status' => 0
+            ]);
+            if ($cnt > 0)
+            {
+                return $this->success();
+            } else
+            {
+                return $this->error();
+            }
+
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
     public function info(Request $request)
     {
         try
@@ -396,9 +442,12 @@ class UserController extends Controller
                 'headimg'
             ])->first();
             $user['headimg'] = asset('/storage/' . $user->headimg);
+            $request['id'] = $user->id;
+            $menulist = $this->getusermenus($request);
             return [
-                'code' => 1,
-                'user' => $user
+                'code'     => 1,
+                'user'     => $user,
+                'menulist' => $menulist
             ];
         } catch (Exception $exception)
         {
@@ -505,8 +554,30 @@ class UserController extends Controller
                 'menu.path',
                 'menu.viewpath',
                 'menu.icon',
-            ])->where('menu.status', '=', 1)->get();
+            ])->where('menu.status', '=', 1)->distinct()->get();
         return $menu;
+    }
+
+    /***
+     * @param Request $request
+     * 获取用户路由表
+     */
+    public function userroutes(Request $request)
+    {
+        try
+        {
+           $route = $this->get_current_user_route();
+           return [
+               'code'=>1,
+               'msg'=>'ok',
+               'result'=>$route
+           ];
+
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
     }
 
 }

@@ -23,11 +23,14 @@ Route::middleware('auth:api')->group(function (){
     Route::post('/user/userrole','Api\UserController@userroles');
     Route::post('/user/userorg','Api\UserController@userorgs');
     Route::get('/user/menus','Api\UserController@getusermenus');
+    Route::get('/user/routes','Api\UserController@userroutes');
     Route::post('/user/edit','Api\UserController@edit');
     Route::post('/user/chpwd','Api\UserController@modifypwd');
     Route::get('user/info','Api\UserController@info');
     Route::post('/user/headimg','Api\UserController@upload_headimg');
     Route::get('/user/find','Api\UserController@findbyid');
+    Route::post('/user/disable','Api\UserController@disable');
+    Route::post('/user/enable','Api\UserController@enable');
     Route::any('/user/logout','Api\UserController@logout');
 
     Route::post('/role/list','Api\RoleController@list');
@@ -38,6 +41,8 @@ Route::middleware('auth:api')->group(function (){
     Route::post('/role/rolemenu','Api\RoleController@rolemenu');
     Route::get('/role/users','Api\RoleController@getusers');
     Route::get('/role/menus','Api\RoleController@getmenus');
+    Route::get('/role/rolerel','Api\RoleController@getrolerel');
+    Route::get('/role/rolemenupath','Api\RoleController@rolemenupath');
 
     Route::post('/menu/list','Api\MenuController@list');
     Route::post('/menu/add','Api\MenuController@add');
@@ -52,15 +57,26 @@ Route::middleware('auth:api')->group(function (){
 
     Route::post('/organize/list','Api\OrganizeController@list');
     Route::post('/organize/add','Api\OrganizeController@add');
+    Route::post('/organize/saveallorg','Api\OrganizeController@saveallorg');
+    Route::get('/organize/create_node','Api\OrganizeController@create_node');
+    Route::get('/organize/remove_node','Api\OrganizeController@remove_node');
+    Route::post('/organize/edited_node','Api\OrganizeController@edited_node');
     Route::get('/organize/del','Api\OrganizeController@del');
+    Route::get('/organize/find','Api\OrganizeController@find');
     Route::post('/organize/edit','Api\OrganizeController@edit');
+    Route::get('/organize/curentnodes','Api\OrganizeController@curentnodes');
+    Route::get('/organize/alltree','Api\OrganizeController@alltree');
+
 
     Route::get('/baseinfo/province','Api\BaseInfoController@province' );
     Route::get('/baseinfo/freshroute','Api\BaseInfoController@freshroute');
     Route::get('/baseinfo/routes','Api\BaseInfoController@routelist' );
     Route::get('/baseinfo/icons','Api\BaseInfoController@icons');
     Route::get('/baseinfo/funcodes','Api\BaseInfoController@funcods');
+    Route::post('/baseinfo/addfuncode','Api\BaseInfoController@addfuncode');
+    Route::get('/baseinfo/delfuncode','Api\BaseInfoController@delfuncode');
     Route::get('/baseinfo/menutypelist','Api\BaseInfoController@menutypelist');
+    Route::get('/baseinfo/orgtypes','Api\BaseInfoController@orgtypes');
 
 });
 
