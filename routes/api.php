@@ -32,6 +32,8 @@ Route::middleware('auth:api')->group(function (){
     Route::post('/user/disable','Api\UserController@disable');
     Route::post('/user/enable','Api\UserController@enable');
     Route::any('/user/logout','Api\UserController@logout');
+    Route::get('/user/get_userroles','Api\UserController@getuserroles');
+    Route::get('/user/get_userorgs','Api\UserController@getuserorg');
 
     Route::post('/role/list','Api\RoleController@list');
     Route::post('/role/add','Api\RoleController@add');

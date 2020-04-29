@@ -19,6 +19,7 @@ class RoleController extends Controller
     {
         try
         {
+            $pagesize= $request->pagesize??15;
             $query = Role::query();
             $query->when($request->name, function (Builder $q) use ($request)
             {
@@ -34,7 +35,7 @@ class RoleController extends Controller
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $query->paginate()
+                'result' => $query->paginate($pagesize)
             ];
 
         } catch (Exception $exception)
