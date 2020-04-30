@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Code\Utils;
 use App\Http\Controllers\Controller;
 use App\Models\FunCode;
 use App\Models\Menu;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class MenuController extends Controller
 {
+    use Utils;
     //
 
     public function list(Request $request)
@@ -322,6 +324,24 @@ class MenuController extends Controller
                 'code'   => 1,
                 'msg'    => 'ok',
                 'result' => $this->checkcodeexsit($code)
+            ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function all_menu_tree(Request $request)
+    {
+        try
+        {
+            $id = $request->id??0;
+            $json = $this->get_menu_all_tree($id);
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>$json
             ];
         } catch (Exception $exception)
         {

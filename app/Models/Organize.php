@@ -46,7 +46,7 @@ class Organize extends Model
       'orgtypename:code,name',
     ];
     public function users(){
-        return $this->belongsToMany('App\Models\User','userorg','orgid','userid');
+        return $this->belongsToMany('App\Models\User','userorg','departmentid','userid');
     }
     public function orgtypename(){
         return $this->belongsTo('App\Models\OrganizeType','orgtype','code');

@@ -56,6 +56,7 @@ Route::middleware('auth:api')->group(function (){
     Route::get('/menu/pagefuns','Api\MenuController@pagefuns');
     Route::get('/menu/disable','Api\MenuController@disable');
     Route::get('/menu/enable','Api\MenuController@enable');
+    Route::get('/menu/all_menu_tree','Api\MenuController@all_menu_tree');
 
     Route::post('/organize/list','Api\OrganizeController@list');
     Route::post('/organize/add','Api\OrganizeController@add');
