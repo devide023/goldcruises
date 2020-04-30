@@ -69,6 +69,7 @@ Route::middleware('auth:api')->group(function (){
     Route::post('/organize/edit','Api\OrganizeController@edit');
     Route::get('/organize/curentnodes','Api\OrganizeController@curentnodes');
     Route::get('/organize/alltree','Api\OrganizeController@alltree');
+    Route::get('/organize/getorgusers','Api\OrganizeController@getorgusers');
 
 
     Route::get('/baseinfo/province','Api\BaseInfoController@province' );
