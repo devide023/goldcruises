@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\City;
+use App\Models\ContractStatus;
+use App\Models\ContractType;
 use App\Models\FunCode;
 use App\Models\Icon;
 use App\Models\MenuType;
@@ -225,6 +227,39 @@ class BaseInfoController extends Controller
            else{
                return $this->error();
            }
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function contracttypes(Request $request)
+    {
+        try
+        {
+            $list = ContractType::all();
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>$list
+            ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function contractstatus(Request $request)
+    {
+        try
+        {
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>ContractStatus::all()
+            ];
         } catch (Exception $exception)
         {
             throw  $exception;

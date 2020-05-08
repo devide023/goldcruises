@@ -1,0 +1,19 @@
+<el-upload
+            class="upload-demo"
+            ref="upload_contract"
+            :headers="headers"
+            :action="uploadpath"
+            :on-preview="handlePreview"
+            :on-remove="handleRemove"
+            :file-list="contract_files"
+            :auto-upload="false"
+            multiple
+          >
+            <el-button slot="trigger" size="small" type="primary">选择合同附件</el-button>
+            <el-button
+              style="margin-left: 10px;"
+              size="small"
+              type="success"
+              @click="upload_contract_files"
+            >上传合同附件</el-button>
+          </el-upload>
