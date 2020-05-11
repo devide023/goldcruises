@@ -62,9 +62,29 @@ class Repair extends Model
     protected $guarded = [];
     protected $with = [
         'details',
-        'images'
+        'images',
+        'statusname:code,name',
+        'typename:code,name'
     ];
-
+    public function addusername(){
+        return $this->belongsTo('App\Models\User','adduserid','id');
+    }
+    public function sendusername(){
+        return $this->belongsTo('App\Models\User','senduserid','id');
+    }
+    public function dealusername(){
+        return $this->belongsTo('App\Models\User','dealuserid','id');
+    }
+    public function endusername()
+    {
+        return $this->belongsTo('App\Models\User','enduserid','id');
+    }
+    public function statusname(){
+        return $this->belongsTo('App\Models\RepairStatus','status','code');
+    }
+    public function typename(){
+        return $this->belongsTo('App\Models\RepairType','type','code');
+    }
     public function details()
     {
         return $this->hasMany('App\Models\RepairDetail', 'repairid', 'id');

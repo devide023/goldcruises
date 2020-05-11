@@ -17,6 +17,7 @@ class CreateRepairTable extends Migration
         Schema::create('repair', function (Blueprint $table) {
             $table->increments('id');
             $table->string('status')->nullable()->default(null)->comment('状态');
+            $table->string('type')->nullable()->default(null)->comment('分类');
             $table->string('repairno')->nullable()->default(null)->comment('维修单号');
             $table->string('title')->nullable()->default(null)->comment('维修主题');
             $table->text('content')->nullable()->default(null)->comment('报修说明');

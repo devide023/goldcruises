@@ -21,9 +21,59 @@ class ContractController extends Controller
         {
             $pagesize = $request->pagesize ?? 15;
             $query = Contract::query();
-            $query->when(!is_null($request->number), function (Builder $q) use ($request)
+            $query->when(!is_null($request->status), function (Builder $q) use ($request)
             {
-                return $q->where('contractno', $request->number);
+                return $q->where('status', $request->status);
+            });
+            $query->when(!is_null($request->type), function (Builder $q) use ($request)
+            {
+                return $q->where('type', $request->type);
+            });
+            $query->when(!is_null($request->contractno), function (Builder $q) use ($request)
+            {
+                return $q->where('contractno', 'like', '%' . strtolower($request->contractno) . '%');
+            });
+            $query->when(!is_null($request->name), function (Builder $q) use ($request)
+            {
+                return $q->where('name', 'like', '%' . strtolower($request->name) . '%');
+            });
+            $query->when(!is_null($request->contractcompany), function (Builder $q) use ($request)
+            {
+                return $q->where('contractcompany', 'like', '%' . strtolower($request->contractcompany) . '%');
+            });
+            $query->when(!is_null($request->payway), function (Builder $q) use ($request)
+            {
+                return $q->where('payway', $request->payway);
+            });
+            $query->when(!is_null($request->dutyperson), function (Builder $q) use ($request)
+            {
+                return $q->where('dutyperson', $request->dutyperson);
+            });
+            $query->when(!is_null($request->cntidentity), function (Builder $q) use ($request)
+            {
+                return $q->where('cntidentity', $request->cntidentity);
+            });
+            $query->when(!is_null($request->adduser), function (Builder $q) use ($request)
+            {
+                return $q->whereHas('adduser', function (Builder $s) use ($request)
+                {
+                    return $s->where('name', 'like', '%' . $request->adduser . '%');
+                });
+            });
+            $query->when(!is_null($request->amount) && !is_null($request->amount1), function (Builder $q) use ($request)
+            {
+                return $q->whereBetween('amount', [
+                    $request->amount,
+                    $request->amount1
+                ]);
+            });
+            $query->when(!is_null($request->signdate), function (Builder $q) use ($request)
+            {
+                return $q->whereBetween('signdate', $request->signdate);
+            });
+            $query->when(!is_null($request->edate), function (Builder $q) use ($request)
+            {
+                return $q->whereBetween('edate', $request->edate);
             });
             return [
                 'code'   => 1,
@@ -32,7 +82,10 @@ class ContractController extends Controller
             ];
         } catch (Exception $exception)
         {
-            throw  $exception;
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
         }
 
     }
@@ -239,9 +292,9 @@ class ContractController extends Controller
         {
             $contract = Contract::find($request->id);
             return [
-                'code'=>1,
-                'msg'=>'ok',
-                'result'=>$contract->contractfiles()->get()
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $contract->contractfiles()->get()
             ];
 
         } catch (Exception $exception)

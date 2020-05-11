@@ -94,6 +94,8 @@ Route::middleware('auth:api')->group(function ()
     Route::get('/baseinfo/orgtypes', 'Api\BaseInfoController@orgtypes');
     Route::get('/baseinfo/contracttypes', 'Api\BaseInfoController@contracttypes');
     Route::get('/baseinfo/contractstatus', 'Api\BaseInfoController@contractstatus');
+    Route::get('/baseinfo/repairstatus', 'Api\BaseInfoController@repairstatus');
+    Route::get('/baseinfo/repairtypes', 'Api\BaseInfoController@repairtypes');
     /*
      * 合同管理路由
      */
@@ -108,10 +110,11 @@ Route::middleware('auth:api')->group(function ()
     /*
      * 报修管理
      */
-    Route::post('/repair/list','Api\Repair\RepairController@edit');
+    Route::post('/repair/list','Api\Repair\RepairController@list');
     Route::post('/repair/add','Api\Repair\RepairController@add');
     Route::post('/repair/edit','Api\Repair\RepairController@edit');
     Route::get('/repair/find','Api\Repair\RepairController@find');
+    Route::get('/repair/repairno','Api\Repair\RepairController@getrepairno');
 
 });
 
