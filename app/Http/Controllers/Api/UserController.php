@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Code\Utils;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
+use App\Models\Organize;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -114,18 +115,6 @@ class UserController extends Controller
                 'headimg'   => $request->headimg,
                 'api_token' => \hash('sha256', Str::random(50)),
             ]);
-            $nodes = $request->organizeids;
-            foreach ($nodes as $node)
-            {
-                $user->orgnodes()->attach($node[count($node) - 1], [
-                    'adduserid' => Auth::id(),
-                    'addtime'   => now(),
-                    'main'      => 0,
-                    'companyid' => $node[count($node) - 2],
-                    'groupid'   => $node[0]
-                ]);
-            }
-
             if ($user->id > 0)
             {
                 DB::commit();
@@ -156,7 +145,7 @@ class UserController extends Controller
         try
         {
             $user = User::find($request->id);
-            $roleids = $request->roleid;
+            $roleids = $request->roleids;
             $user->roles()->sync($roleids);
             return $this->success();
         } catch (Exception $exception)
@@ -165,29 +154,66 @@ class UserController extends Controller
         }
     }
 
+    public function getuserroles(Request $request)
+    {
+        try
+        {
+            $user = User::find($request->id);
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $user->roles
+            ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    /***
+     * @param Request $request
+     * @return array
+     * 保存用户关联组织
+     */
     public function userorgs(Request $request)
     {
         try
         {
             $user = User::find($request->id);
-            $orgids = $request->orgid;
-            $attr = [
-                'main'      => 0,
-                'adduserid' => Auth::user()->id,
-                'addtime'   => now()
-            ];
-            $postdata = [];
-            foreach ($orgids as $orgid)
-            {
-                $postdata[$orgid] = $attr;
+            $nodes = collect($request->orgnodes);
+            $postdata=[];
+            foreach ($nodes as $node){
+                $postdata[$node['id']]=[
+                    'adduserid'=>Auth::id(),
+                    'addtime'=>now(),
+                    'main'=>0,
+                    'companyid'=>$node['parentid']
+                    ];
             }
-            $postdata[Arr::random($orgids)]['main'] = 1;
             $user->orgnodes()->sync($postdata);
             return $this->success();
         } catch (Exception $exception)
         {
 
         }
+    }
+
+    public function getuserorg(Request $request)
+    {
+        try
+        {
+            $user = User::find($request->id);
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>$user->orgnodes
+            ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
     }
 
     public function edit(Request $request)
@@ -213,12 +239,13 @@ class UserController extends Controller
                     'birthdate' => $request->birthday,
                     'idno'      => $request->idno,
                     'tel'       => $request->tel,
-                    'adress'    => $request->address,
+                    'adress'    => $request->adress,
                     'email'     => $request->email,
                     'province'  => $request->province,
                     'city'      => $request->city,
                     'district'  => $request->district,
                 ]);
+
                 if ($isok)
                 {
                     return [
@@ -371,10 +398,11 @@ class UserController extends Controller
     {
         try
         {
+            $user = User::find($request->id);
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => User::find($request->id)
+                'result' => $user
             ];
         } catch (Exception $exception)
         {
@@ -566,12 +594,12 @@ class UserController extends Controller
     {
         try
         {
-           $route = $this->get_current_user_route();
-           return [
-               'code'=>1,
-               'msg'=>'ok',
-               'result'=>$route
-           ];
+            $route = $this->get_current_user_route();
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $route
+            ];
 
         } catch (Exception $exception)
         {

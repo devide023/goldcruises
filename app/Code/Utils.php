@@ -4,6 +4,7 @@
 namespace App\Code;
 
 
+use App\Models\Menu;
 use App\Models\Organize;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -85,6 +86,73 @@ trait Utils
             throw  $exception;
         }
 
+    }
+
+    public function get_menu_all_tree($id=0)
+    {
+        try
+        {
+            $all_menus=[];
+            $rootmenus = Menu::where('pid','=',$id)
+                ->where('status','=',1)
+                ->get();
+
+            foreach ($rootmenus as $rootmenu)
+            {
+                $haschild = Menu::where('pid',$rootmenu->id)
+                    ->where('status','=',1)
+                    ->count();
+                $data = [
+                    'id'=>$rootmenu->id,
+                    'parentid'=>$rootmenu->pid,
+                    'label'=>$rootmenu->name,
+                    'menucode'=>$rootmenu->menucode,
+                    'menutype'=>$rootmenu->menutype,
+                    'value'=>$rootmenu->id
+                ];
+                if($haschild>0){
+                    $data['children']=$this->get_menu_sub_tree($rootmenu->id);;
+                }else
+                {
+                    $pushdata['leaf']=true;
+                }
+                array_push($all_menus,$data);
+            }
+            return $all_menus;
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    private function get_menu_sub_tree($id){
+        $menus=[];
+        $submenus = Menu::where('pid','=',$id)
+            ->where('status','=',1)
+            ->get();
+        foreach ($submenus as $submenu)
+        {
+            $haschild = Menu::where('pid',$submenu->id)
+                ->where('status','=',1)
+                ->count();
+            $data = [
+                'id'=>$submenu->id,
+                'parentid'=>$submenu->pid,
+                'label'=>$submenu->name,
+                'menucode'=>$submenu->menucode,
+                'menutype'=>$submenu->menutype,
+                'value'=>$submenu->id
+            ];
+            if($haschild>0){
+                $data['children']=$this->get_menu_sub_tree($submenu->id);
+            }else
+            {
+                $pushdata['leaf']=true;
+            }
+            array_push($menus,$data);
+        }
+        return $menus;
     }
 
 }

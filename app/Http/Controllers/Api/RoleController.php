@@ -19,6 +19,7 @@ class RoleController extends Controller
     {
         try
         {
+            $pagesize = $request->pagesize ?? 15;
             $query = Role::query();
             $query->when($request->name, function (Builder $q) use ($request)
             {
@@ -34,7 +35,7 @@ class RoleController extends Controller
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $query->paginate()
+                'result' => $query->paginate($pagesize)
             ];
 
         } catch (Exception $exception)
@@ -168,17 +169,22 @@ class RoleController extends Controller
     {
         try
         {
-            $res=[];
+            $res = [];
             $role = Role::find($request->id);
-            $menus = $role->menus->where('menutype','=','03');
-            foreach ($menus as $menu){
+            $menus = $role->menus->where('menutype', '=', '03');
+            foreach ($menus as $menu)
+            {
                 $root = Menu::find($menu->pid);
-                array_push($res,[$root->pid,$menu->pid,$menu->id]);
+                array_push($res, [
+                    $root->pid,
+                    $menu->pid,
+                    $menu->id
+                ]);
             }
             return [
-                'code'=>1,
-                'msg'=>'ok',
-                'result'=>$res
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $res
             ];
         } catch (Exception $exception)
         {
@@ -204,10 +210,24 @@ class RoleController extends Controller
         try
         {
             $role = Role::find($request->id);
-            return $role->menus()->get();
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $role->menus()->get()
+            ];
         } catch (Exception $exception)
         {
 
+        }
+    }
+
+    private function getparentid(&$array, $pid)
+    {
+        array_unshift($array, $pid);
+        $parent = Menu::find($pid);
+        if ($parent->pid != 0)
+        {
+            $this->getparentid($array,$parent->pid);
         }
     }
 
@@ -216,10 +236,24 @@ class RoleController extends Controller
         try
         {
             $role = Role::find($request->id);
+            $menus = $role->menus;
+            $leafs = $menus->where('menutype', '=', '03');
+            $data = [];
+            foreach ($leafs as $leaf)
+            {
+                $lastnode = [];
+                array_unshift($lastnode, $leaf->id);
+                if ($leaf->pid != 0)
+                {
+                    $this->getparentid($lastnode, $leaf->pid);
+                }
+                array_push($data, $lastnode);
+            }
             return [
-                'code'=>1,
-                'msg'=>'ok',
-                'result'=>$role
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $role,
+                'menuspath'  => $data
             ];
 
         } catch (Exception $exception)

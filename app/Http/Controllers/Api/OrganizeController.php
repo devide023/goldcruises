@@ -320,6 +320,24 @@ class OrganizeController extends Controller
 
     }
 
+    public function getorgusers(Request $request)
+    {
+        try
+        {
+            $org = Organize::find($request->id);
+            $users = $org->users()->get();
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>$users
+            ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
     /**
      * @param Request $request
      * 获取当前节点下的子节点

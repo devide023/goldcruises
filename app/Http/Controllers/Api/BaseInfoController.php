@@ -4,10 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\City;
+use App\Models\ContractStatus;
+use App\Models\ContractType;
 use App\Models\FunCode;
 use App\Models\Icon;
 use App\Models\MenuType;
 use App\Models\OrganizeType;
+use App\Models\RepairStatus;
+use App\Models\RepairType;
 use App\Models\Routes;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -228,6 +232,81 @@ class BaseInfoController extends Controller
         } catch (Exception $exception)
         {
             throw  $exception;
+        }
+
+    }
+
+    public function contracttypes(Request $request)
+    {
+        try
+        {
+            $list = ContractType::all();
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>$list
+            ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function contractstatus(Request $request)
+    {
+        try
+        {
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>ContractStatus::all()
+            ];
+        } catch (Exception $exception)
+        {
+            throw  $exception;
+        }
+
+    }
+
+    public function repairtypes(Request $request)
+    {
+        try
+        {
+            $types = RepairType::orderBy('seq')->get();
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>$types
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code'=>0,
+                'msg'=>'error',
+                'result'=>$exception->getMessage()
+            ];
+        }
+
+    }
+
+    public function repairstatus(Request $request)
+    {
+        try
+        {
+            $status = RepairStatus::orderBy('seq')->get();
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>$status
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code'=>0,
+                'msg'=>'error',
+                'result'=>$exception->getMessage()
+            ];
         }
 
     }
