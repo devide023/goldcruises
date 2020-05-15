@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            organizetable_seeder::class
+            mpmenu_seeder::class
                      //roletable_seeder::class,
                     // userstable_seeder::class
             //funcode_seeder::class

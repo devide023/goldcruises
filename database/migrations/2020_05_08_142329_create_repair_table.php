@@ -52,8 +52,11 @@ class CreateRepairTable extends Migration
             $table->increments('id');
             $table->integer('repairid')->nullable()->default(null)->comment('维修单id');
             $table->text('content')->nullable()->default(null)->comment('处理意见');
-            $table->integer('dealuserid')->nullable()->default(null)->comment('处理人');
-            $table->dateTime('dealtime')->nullable()->default(null)->comment('处理时间');
+            $table->string('dealuser')->nullable()->default(null)->comment('维修人名称');
+            $table->string('dealusertel')->nullable()->default(null)->comment('维修人联系电话');
+            $table->text('note')->nullable()->default(null)->comment('备注');
+            $table->integer('adduserid')->nullable()->default(null)->comment('操作人');
+            $table->dateTime('dealtime')->nullable()->default(null)->comment('操作时间');
         });
         Schema::dropIfExists('repairdetailimg');
         Schema::create('repairdetailimg',function (Blueprint $table){

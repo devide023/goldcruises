@@ -64,7 +64,11 @@ class Repair extends Model
         'details',
         'images',
         'statusname:code,name',
-        'typename:code,name'
+        'typename:code,name',
+        'addusername',
+        'sendusername',
+        'dealusername',
+        'endusername'
     ];
     public function addusername(){
         return $this->belongsTo('App\Models\User','adduserid','id');
