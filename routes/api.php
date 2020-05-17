@@ -29,7 +29,7 @@ Route::middleware('auth:api')->group(function ()
     Route::get('/user/routes', 'Api\UserController@userroutes');
     Route::post('/user/edit', 'Api\UserController@edit');
     Route::post('/user/chpwd', 'Api\UserController@modifypwd');
-    Route::get('user/info', 'Api\UserController@info');
+    Route::get('/user/info', 'Api\UserController@info');
     Route::post('/user/headimg', 'Api\UserController@upload_headimg');
     Route::get('/user/find', 'Api\UserController@findbyid');
     Route::post('/user/disable', 'Api\UserController@disable');
@@ -115,6 +115,17 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/repair/edit','Api\Repair\RepairController@edit');
     Route::get('/repair/find','Api\Repair\RepairController@find');
     Route::get('/repair/repairno','Api\Repair\RepairController@getrepairno');
+    Route::post('/repair/upload/repairimg','Api\Repair\RepairController@uploadrepairimg');
+    Route::post('/repair/upload/detailimg','Api\Repair\RepairController@uploadrepairdetailimg');
+    Route::post('/repair/removeimgs','Api\Repair\RepairController@removeimgs');
+    Route::post('/repair/removedetailimgs','Api\Repair\RepairController@remove_detailimgs');
+    Route::post('/repair/savedealinfo','Api\Repair\RepairController@savedealinfo');
+    Route::post('/repair/repair_infolist','Api\Repair\RepairController@getrepair_infolist');
+    /*
+     * 小程序接口
+     */
+    Route::get('/mp/userinfo','Api\MicroProgram\MpController@userinfo');
+    Route::get('/mp/menus','Api\MicroProgram\MpController@getmpmenu');
 
 });
 

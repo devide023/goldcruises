@@ -3,10 +3,17 @@
 namespace App\Http\Controllers\Api\Repair;
 
 use App\Http\Controllers\Controller;
+use App\Models\ContractFile;
 use App\Models\Repair;
+use App\Models\RepairDetail;
+use App\Models\RepairDetailImg;
+use App\Models\RepairImage;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Ramsey\Uuid\Uuid;
 
 class RepairController extends Controller
 {
@@ -19,71 +26,103 @@ class RepairController extends Controller
             $query = Repair::query();
             $query->when(!is_null($request->repairno), function (Builder $q) use ($request)
             {
-                return $q->where('repairno','like','%'. $request->repairno.'%');
+                return $q->where('repairno', 'like', '%' . $request->repairno . '%');
             });
-            $query->when(!is_null($request->status),function (Builder $q) use ($request){
-               return $q->where('status',$request->stauts);
+            $query->when(!is_null($request->status), function (Builder $q) use ($request)
+            {
+                return $q->where('status', $request->stauts);
             });
-            $query->when(!is_null($request->type),function (Builder $q) use ($request){
-                return $q->where('type',$request->type);
+            $query->when(!is_null($request->type), function (Builder $q) use ($request)
+            {
+                return $q->where('type', $request->type);
             });
-            $query->when(!is_null($request->adduser),function (Builder $q) use ($request){
-                return $q->whereHas('addusername',function (Builder $s) use ($request){
-                   return $s->where('name','like','%'.$request->adduser.'%');
+            $query->when(!is_null($request->adduserid), function (Builder $q) use ($request)
+            {
+                return $q->where('adduserid', $request->adduserid);
+            });
+            $query->when(!is_null($request->senduserid), function (Builder $q) use ($request)
+            {
+                return $q->where('senduserid', $request->senduserid);
+            });
+            $query->when(!is_null($request->dealuserid), function (Builder $q) use ($request)
+            {
+                return $q->where('dealuserid', $request->dealuserid);
+            });
+            $query->when(!is_null($request->enduserid), function (Builder $q) use ($request)
+            {
+                return $q->where('enduserid', $request->enduserid);
+            });
+            $query->when(!is_null($request->adduser), function (Builder $q) use ($request)
+            {
+                return $q->whereHas('addusername', function (Builder $s) use ($request)
+                {
+                    return $s->where('name', 'like', '%' . $request->adduser . '%');
                 });
             });
-            $query->when(!is_null($request->sendperson),function (Builder $q) use ($request){
-                return $q->whereHas('sendusername',function (Builder $s) use ($request){
-                    return $s->where('name','like','%'.$request->sendperson.'%');
+            $query->when(!is_null($request->sendperson), function (Builder $q) use ($request)
+            {
+                return $q->whereHas('sendusername', function (Builder $s) use ($request)
+                {
+                    return $s->where('name', 'like', '%' . $request->sendperson . '%');
                 });
             });
-            $query->when(!is_null($request->enduser),function (Builder $q) use ($request){
-                return $q->whereHas('endusername',function (Builder $s) use ($request){
-                    return $s->where('name','like','%'.$request->enduser.'%');
+            $query->when(!is_null($request->enduser), function (Builder $q) use ($request)
+            {
+                return $q->whereHas('endusername', function (Builder $s) use ($request)
+                {
+                    return $s->where('name', 'like', '%' . $request->enduser . '%');
                 });
             });
-            $query->when(!is_null($request->dealperson),function (Builder $q) use ($request){
-                return $q->whereHas('dealusername',function (Builder $s) use ($request){
-                    return $s->where('name','like','%'.$request->dealperson.'%');
+            $query->when(!is_null($request->dealperson), function (Builder $q) use ($request)
+            {
+                return $q->whereHas('dealusername', function (Builder $s) use ($request)
+                {
+                    return $s->where('name', 'like', '%' . $request->dealperson . '%');
                 });
             });
-            $query->when(!is_null($request->title),function (Builder $q) use ($request){
-                return $q->where('title','like','%'.$request->title.'%');
+            $query->when(!is_null($request->title), function (Builder $q) use ($request)
+            {
+                return $q->where('title', 'like', '%' . $request->title . '%');
             });
-            $query->when(!is_null($request->note),function (Builder $q) use ($request){
-                return $q->where('note','like','%'.$request->note.'%');
+            $query->when(!is_null($request->note), function (Builder $q) use ($request)
+            {
+                return $q->where('note', 'like', '%' . $request->note . '%');
             });
-            $query->when(!is_null($request->substance),function (Builder $q) use ($request){
-                return $q->where('content','like','%'.$request->substance.'%');
+            $query->when(!is_null($request->substance), function (Builder $q) use ($request)
+            {
+                return $q->where('content', 'like', '%' . $request->substance . '%');
             });
-            $query->when(!is_null($request->senddate),function (Builder $q) use ($request){
+            $query->when(!is_null($request->senddate), function (Builder $q) use ($request)
+            {
                 $date = $request->senddate;
-                $date[0] = $date[0].' 0:0:0';
-                $date[1] = $date[1].' 23:59:59';
-                return $q->whereBetween('sendtime',$date);
+                $date[0] = $date[0] . ' 0:0:0';
+                $date[1] = $date[1] . ' 23:59:59';
+                return $q->whereBetween('sendtime', $date);
             });
-            $query->when(!is_null($request->adddate),function (Builder $q) use ($request){
+            $query->when(!is_null($request->adddate), function (Builder $q) use ($request)
+            {
                 $date = $request->adddate;
-                $date[0] = $date[0].' 0:0:0';
-                $date[1] = $date[1].' 23:59:59';
-                return $q->whereBetween('addtime',$date);
+                $date[0] = $date[0] . ' 0:0:0';
+                $date[1] = $date[1] . ' 23:59:59';
+                return $q->whereBetween('addtime', $date);
             });
-            $query->when(!is_null($request->enddate),function (Builder $q) use ($request){
+            $query->when(!is_null($request->enddate), function (Builder $q) use ($request)
+            {
                 $date = $request->enddate;
-                $date[0] = $date[0].' 0:0:0';
-                $date[1] = $date[1].' 23:59:59';
-                return $q->whereBetween('endtime',$date);
+                $date[0] = $date[0] . ' 0:0:0';
+                $date[1] = $date[1] . ' 23:59:59';
+                return $q->whereBetween('endtime', $date);
             });
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $query->paginate($pagesize)
+                'result' => $query->orderBy('id', 'desc')->paginate($pagesize)
             ];
         } catch (Exception $exception)
         {
             return [
-                'code'=>0,
-                'msg'=>$exception->getMessage()
+                'code' => 0,
+                'msg'  => $exception->getMessage()
             ];
         }
 
@@ -93,15 +132,14 @@ class RepairController extends Controller
     {
         try
         {
-           $has = Repair::where('repairno',$request->repairno)->count();
-           if($has>0)
-           {
-               return [
-                   'code'=>0,
-                   'msg'=>'报修单号已经存在',
-                   'result'=>$this->getrepairno()
-               ];
-           }
+            $has = Repair::where('repairno', $request->repairno)->count();
+            if ($has > 0)
+            {
+                return [
+                    'code' => 0,
+                    'msg'  => '报修单号重复'
+                ];
+            }
             $repair = Repair::create([
                 'status'     => $request->status,
                 'type'       => $request->type,
@@ -116,7 +154,133 @@ class RepairController extends Controller
             ]);
             if ($repair->id > 0)
             {
+                $imgnames = $request->images;
+                if (!is_null($imgnames))
+                {
+                    DB::table('repairimage')->whereIn('filename', $imgnames)->update([
+                        'repairid' => $repair->id
+                    ]);
+                }
                 return $this->success();
+            } else
+            {
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+
+    }
+
+    /*
+     * 保存维修详情
+     */
+    public function savedealinfo(Request $request)
+    {
+        try
+        {
+            $repairid = $request->repairid;
+            if (!is_null($repairid))
+            {
+                DB::beginTransaction();
+                Repair::where('id',$repairid)->update([
+                    'status' => '02'
+                ]);
+                $detail = RepairDetail::create([
+                    'repairid'    => $repairid,
+                    'content'     => $request->dealcontent,
+                    'dealuser'    => $request->dealuser,
+                    'dealusertel' => $request->dealusertel,
+                    'note'        => $request->note,
+                    'adduserid'   => Auth::id(),
+                    'dealtime'    => now()
+                ]);
+                if ($detail->id > 0)
+                {
+                    Repair::where('id',$repairid)->update([
+                        'dealperson' => $request->dealuser,
+                        'dealpersontel' => $request->dealusertel
+                    ]);
+                    $images = $request->images;
+                    if (!is_null($images))
+                    {
+                        $cnt = DB::table('repairdetailimg')->whereIn('filename', $images)->update([
+                            'detailid' => $detail->id
+                        ]);
+                    }
+                    DB::commit();
+                    return $this->success();
+                }
+            } else
+            {
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+
+    }
+
+    /*
+     * 删除未更新repairid的图片
+     */
+    public function removeimgs(Request $request)
+    {
+        try
+        {
+            $images = $request->images;
+            if (!is_null($images))
+            {
+                foreach ($images as $image)
+                {
+                    $ok = Storage::disk('local')->delete('/repair/' . $image);
+                    if ($ok)
+                    {
+                        $id = DB::table('repairimage')->where('filename', $image)->where('repairid', '=', null)
+                            ->delete();
+                    }
+                }
+                return $this->success();
+
+            } else
+            {
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+
+    }
+
+    public function remove_detailimgs(Request $request)
+    {
+        try
+        {
+            $images = $request->images;
+            if (!is_null($images))
+            {
+                foreach ($images as $image)
+                {
+                    $ok = Storage::disk('local')->delete('/repair/' . $image);
+                    if ($ok)
+                    {
+                        $id = DB::table('repairdetailimg')->where('filename', $image)->delete();
+                    }
+                }
+                return $this->success();
+
             } else
             {
                 return $this->error();
@@ -196,4 +360,116 @@ class RepairController extends Controller
         }
 
     }
+
+    public function uploadrepairimg(Request $request)
+    {
+        try
+        {
+            $file = $request->file('file');
+            $newfilename = Uuid::uuid1()->getHex() . '.' . $file->clientExtension();
+            $tmpFile = $file->getRealPath();
+            $issaved = Storage::disk('local')->put('/repair/' . $newfilename, file_get_contents($tmpFile));
+            if ($issaved)
+            {
+                $repairimg = RepairImage::create([
+                    'filename'     => $newfilename,
+                    'filetype'     => $file->clientExtension(),
+                    'originalname' => $file->getClientOriginalName(),
+                    'adduserid'    => Auth::id(),
+                    'addtime'      => now()
+                ]);
+                if ($repairimg->id > 0)
+                {
+                    return [
+                        'code'   => 1,
+                        'msg'    => 'ok',
+                        'result' => $newfilename
+                    ];
+                } else
+                {
+                    return $this->error();
+                }
+            } else
+            {
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+
+    }
+
+    public function uploadrepairdetailimg(Request $request)
+    {
+        try
+        {
+            $file = $request->file('file');
+            $newfilename = Uuid::uuid1()->getHex() . '.' . $file->clientExtension();
+            $tmpFile = $file->getRealPath();
+            $issaved = Storage::disk('local')->put('/repair/' . $newfilename, file_get_contents($tmpFile));
+            if ($issaved)
+            {
+                $repairdetailimg = RepairDetailImg::create([
+                    'filename'     => $newfilename,
+                    'filetype'     => $file->clientExtension(),
+                    'originalname' => $file->getClientOriginalName(),
+                    'adduserid'    => Auth::id(),
+                    'addtime'      => now()
+                ]);
+                if ($repairdetailimg->id > 0)
+                {
+                    return [
+                        'code'   => 1,
+                        'msg'    => 'ok',
+                        'result' => $newfilename
+                    ];
+                } else
+                {
+                    return $this->error();
+                }
+            } else
+            {
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+
+    }
+
+    public function getrepair_infolist(Request $request)
+    {
+        try
+        {
+            $repairid = $request->repairid;
+            $pagesize = $request->pagesize??15;
+            if(!is_null($repairid)){
+                $details = RepairDetail::where('repairid',$repairid);
+                return [
+                    'code'=>1,
+                    'msg'=>'ok',
+                    'result'=>$details->paginate($pagesize)
+                ];
+            }else
+            {
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+
+    }
+
 }
