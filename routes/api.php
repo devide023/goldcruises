@@ -102,6 +102,8 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/process/list','Api\ProcessController@list');
     Route::post('/process/add','Api\ProcessController@addprocess');
     Route::get('/process/current_user_process','Api\ProcessController@get_currentuser_process');
+    Route::get('/process/current_step','Api\ProcessController@current_step');
+    Route::get('/process/nextstep','Api\ProcessController@next_step');
     /*
      * 合同管理路由
      */
