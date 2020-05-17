@@ -97,6 +97,12 @@ Route::middleware('auth:api')->group(function ()
     Route::get('/baseinfo/repairstatus', 'Api\BaseInfoController@repairstatus');
     Route::get('/baseinfo/repairtypes', 'Api\BaseInfoController@repairtypes');
     /*
+    * 流程管理
+    */
+    Route::post('/process/list','Api\ProcessController@list');
+    Route::post('/process/add','Api\ProcessController@addprocess');
+    Route::get('/process/current_user_process','Api\ProcessController@get_currentuser_process');
+    /*
      * 合同管理路由
      */
     Route::post('/contract/list', 'Api\Contract\ContractController@list');
@@ -121,6 +127,7 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/repair/removedetailimgs','Api\Repair\RepairController@remove_detailimgs');
     Route::post('/repair/savedealinfo','Api\Repair\RepairController@savedealinfo');
     Route::post('/repair/repair_infolist','Api\Repair\RepairController@getrepair_infolist');
+
     /*
      * 小程序接口
      */
