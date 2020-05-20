@@ -216,6 +216,57 @@ class UserController extends Controller
 
     }
 
+    public function save_userpermission(Request $request)
+    {
+        try
+        {
+            $orgids = $request->orgids;
+            $user = User::find($request->id);
+            $postdata=[];
+            foreach ($orgids as $orgid){
+                array_push($postdata,[
+                    'orgid'=>$orgid['id'],
+                    'adduserid'=>Auth::id(),
+                    'addtime'=>now()
+                ]);
+            }
+            $cnt = $user->permissions()->createMany($postdata);
+            if(count($cnt) == count($orgids)){
+                return $this->success();
+            }else{
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+
+    }
+
+    public function get_userpermission(Request $request)
+    {
+        try
+        {
+           $userid = $request->id??0;
+           $orgids = DB::table('userpermission')->where('userid',$userid)->pluck('orgid');
+           return [
+               'code'=>1,
+               'msg'=>'ok',
+               'result'=>$orgids
+           ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+
+    }
+
     public function edit(Request $request)
     {
         try
@@ -469,7 +520,12 @@ class UserController extends Controller
                 'email',
                 'headimg'
             ])->first();
+            $deptids = DB::table('userorg')->where('userid',$user->id)->pluck('departmentid');
+            $comids = DB::table('userorg')->where('userid',$user->id)->pluck('companyid');
             $user['headimg'] = asset('/storage/' . $user->headimg);
+            $user['companyid'] = $comids;
+            $user['orgid']=$deptids;
+            $user['userid'] =$user->id;
             $request['id'] = $user->id;
             $menulist = $this->getusermenus($request);
             return [

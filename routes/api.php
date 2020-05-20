@@ -37,6 +37,8 @@ Route::middleware('auth:api')->group(function ()
     Route::any('/user/logout', 'Api\UserController@logout');
     Route::get('/user/get_userroles', 'Api\UserController@getuserroles');
     Route::get('/user/get_userorgs', 'Api\UserController@getuserorg');
+    Route::get('/user/userpermissions', 'Api\UserController@get_userpermission');
+    Route::post('/user/permission', 'Api\UserController@save_userpermission');
     /*
      * 角色
      */
@@ -103,7 +105,9 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/process/add','Api\ProcessController@addprocess');
     Route::get('/process/current_user_process','Api\ProcessController@get_currentuser_process');
     Route::get('/process/current_step','Api\ProcessController@current_step');
-    Route::get('/process/nextstep','Api\ProcessController@next_step');
+    Route::get('/process/stepusers','Api\ProcessController@stepusers');//获取当前流程审核人
+    Route::get('/process/getsetps','Api\ProcessController@getsetplist');//获取流程所有步骤
+    Route::get('/process/billstep','Api\ProcessController@get_billid_step');//获取单据流程节点
     /*
      * 合同管理路由
      */
@@ -129,7 +133,12 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/repair/removedetailimgs','Api\Repair\RepairController@remove_detailimgs');
     Route::post('/repair/savedealinfo','Api\Repair\RepairController@savedealinfo');
     Route::post('/repair/repair_infolist','Api\Repair\RepairController@getrepair_infolist');
-
+    Route::get('/repair/shipauditor','Api\Repair\RepairController@auditor');
+    Route::get('/repair/myrepairlist','Api\Repair\RepairController@myrepairlist');
+    Route::get('/repair/mytasklist','Api\Repair\RepairController@mytasklist');
+    Route::get('/repair/images','Api\Repair\RepairController@repairimgs');
+    Route::get('/repair/nextsetp','Api\Repair\RepairController@repair_next');
+    Route::get('/repair/disgree','Api\Repair\RepairController@disgree_bill');
     /*
      * 小程序接口
      */

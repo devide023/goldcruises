@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 
+
+
 /**
  * App\Models\User
  *
@@ -30,8 +32,14 @@ use Illuminate\Support\Facades\Auth;
  * @property-read \App\Models\User $adduser
  * @property-read \App\Models\City|null $cityname
  * @property-read \App\Models\City|null $districtname
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\MpUserFun[] $mpfuns
+ * @property-read int|null $mpfuns_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\MpUserMenu[] $mpmenus
+ * @property-read int|null $mpmenus_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Organize[] $orgnodes
  * @property-read int|null $orgnodes_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\UserPermission[] $permissions
+ * @property-read int|null $permissions_count
  * @property-read \App\Models\City|null $provincename
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\Role[] $roles
  * @property-read int|null $roles_count
@@ -112,4 +120,18 @@ class User extends \Illuminate\Foundation\Auth\User
     {
         return $this->belongsTo('App\Models\City', 'district', 'id');
     }
+
+    public function permissions(){
+        return $this->hasMany('App\Models\UserPermission','userid','id');
+    }
+
+    public function mpfuns()
+    {
+        return $this->hasMany('App\Models\MpUserFun','userid','id');
+    }
+    public function mpmenus()
+    {
+        return $this->hasMany('App\Models\MpUserMenu','userid','id');
+    }
+
 }

@@ -18,7 +18,6 @@ class CreateProcessTable extends Migration
             $table->integer('status')->nullable()->default(1)->comment('状态');
             $table->string('name')->nullable()->default(null)->comment('流程名称');
             $table->integer('adduserid')->nullable()->default(null)->comment('操作人');
-            $table->integer('orgid')->nullable()->default(null)->comment('组织节点id');
             $table->dateTime('addtime')->nullable()->default(null)->comment('操作时间');
         });
 

@@ -2,13 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 
 /**
  * App\Models\Repair
  *
  * @property int $id
  * @property string|null $status 状态
+ * @property string|null $type 分类
  * @property string|null $repairno 维修单号
  * @property string|null $title 维修主题
  * @property string|null $content 报修说明
@@ -26,10 +31,17 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $enduserid 完结操作人id
  * @property string|null $enduser 完结操作人
  * @property string|null $note 备注
+ * @property int|null $orgid 组织id
+ * @property-read \App\Models\User|null $addusername
+ * @property-read \App\Models\User|null $dealusername
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\RepairDetail[] $details
  * @property-read int|null $details_count
+ * @property-read \App\Models\User|null $endusername
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\RepairImage[] $images
  * @property-read int|null $images_count
+ * @property-read \App\Models\User|null $sendusername
+ * @property-read \App\Models\RepairStatus|null $statusname
+ * @property-read \App\Models\RepairType|null $typename
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair query()
@@ -46,12 +58,14 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereEnduserid($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereNote($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereOrgid($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereRepairno($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereSendperson($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereSendtime($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereSenduserid($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereTitle($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereType($value)
  * @mixin \Eloquent
  */
 class Repair extends Model
@@ -98,4 +112,9 @@ class Repair extends Model
     {
         return $this->hasMany('App\Models\RepairImage', 'repairid', 'id');
     }
+
+
+
+
+
 }

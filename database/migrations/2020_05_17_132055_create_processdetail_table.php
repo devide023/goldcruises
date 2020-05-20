@@ -19,6 +19,7 @@ class CreateProcessdetailTable extends Migration
             $table->integer('billid')->nullable()->default(null)->comment('单据id');
             $table->integer('stepno')->nullable()->default(null)->comment('当前步骤');
             $table->integer('flow')->nullable()->default(null)->comment('流程流向');
+            $table->integer('isover')->nullable()->default(0)->comment('是否结束');
             $table->integer('adduserid')->nullable()->default(null)->comment('操作人');
             $table->dateTime('addtime')->nullable()->default(now())->comment('操作日期');
         });
@@ -31,6 +32,6 @@ class CreateProcessdetailTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('processdetail');
+        Schema::dropIfExists('processinfo');
     }
 }

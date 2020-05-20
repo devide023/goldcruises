@@ -35,6 +35,7 @@ class CreateRepairTable extends Migration
             $table->integer('enduserid')->nullable()->default(null)->comment('完结操作人id');
             $table->string('enduser')->nullable()->default(null)->comment('完结操作人');
             $table->text('note')->nullable()->default(null)->comment('备注');
+            $table->integer('orgid')->nullable()->default(null)->comment('组织id');
         });
         Schema::dropIfExists('repairimage');
         Schema::create('repairimage',function (Blueprint $table){

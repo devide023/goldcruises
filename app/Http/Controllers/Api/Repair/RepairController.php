@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers\Api\Repair;
 
+use App\Code\AuditIds;
+use App\Code\BusProcess;
+use App\Code\DataPermission;
 use App\Http\Controllers\Controller;
 use App\Models\ContractFile;
 use App\Models\Repair;
 use App\Models\RepairDetail;
 use App\Models\RepairDetailImg;
 use App\Models\RepairImage;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +21,9 @@ use Ramsey\Uuid\Uuid;
 
 class RepairController extends Controller
 {
+    use DataPermission;
+    use AuditIds;
+    use  BusProcess;
     //
     public function list(Request $request)
     {
@@ -128,11 +135,65 @@ class RepairController extends Controller
 
     }
 
+    public function myrepairlist(Request $request)
+    {
+        try
+        {
+            $pagesize = $request->pagesize ?? 15;
+            $orgids = $this->current_user_datapermission();
+
+            $query = Repair::whereIn('orgid',$orgids);
+            $query = $query->where(function(Builder $q) use ($request){
+                $uid = Auth::id();
+                return $q->orWhere('adduserid',$uid)
+                    ->orWhere('senduserid',$uid)
+                    ->orWhere('dealuserid',$uid);
+            });
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $query->orderBy('id', 'desc')->paginate($pagesize)
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+
+    }
+
+    public function mytasklist(Request $request)
+    {
+        try
+        {
+            $pagesize = $request->pagesize ?? 15;
+            $query = Repair::query();
+            $query = $query->whereIn('id', $this->current_audit_ids(1));
+            $query = $query->whereIn('orgid',$this->current_user_datapermission());
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $query->orderBy('id', 'desc')->paginate($pagesize)
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+
+    }
+
     public function add(Request $request)
     {
         try
         {
             $has = Repair::where('repairno', $request->repairno)->count();
+            $orgid =DB::table('userorg')->where('userid',Auth::id())
+                    ->value('departmentid')??0;
             if ($has > 0)
             {
                 return [
@@ -150,7 +211,8 @@ class RepairController extends Controller
                 'adduser'    => Auth::user()->name,
                 'addusertel' => $request->addusertel,
                 'addtime'    => now(),
-                'note'       => $request->note
+                'note'       => $request->note,
+                'orgid' =>$orgid
             ]);
             if ($repair->id > 0)
             {
@@ -187,7 +249,7 @@ class RepairController extends Controller
             if (!is_null($repairid))
             {
                 DB::beginTransaction();
-                Repair::where('id',$repairid)->update([
+                Repair::where('id', $repairid)->update([
                     'status' => '02'
                 ]);
                 $detail = RepairDetail::create([
@@ -201,8 +263,8 @@ class RepairController extends Controller
                 ]);
                 if ($detail->id > 0)
                 {
-                    Repair::where('id',$repairid)->update([
-                        'dealperson' => $request->dealuser,
+                    Repair::where('id', $repairid)->update([
+                        'dealperson'    => $request->dealuser,
                         'dealpersontel' => $request->dealusertel
                     ]);
                     $images = $request->images;
@@ -450,18 +512,113 @@ class RepairController extends Controller
         try
         {
             $repairid = $request->repairid;
-            $pagesize = $request->pagesize??15;
-            if(!is_null($repairid)){
-                $details = RepairDetail::where('repairid',$repairid);
+            $pagesize = $request->pagesize ?? 15;
+            if (!is_null($repairid))
+            {
+                $details = RepairDetail::where('repairid', $repairid);
                 return [
-                    'code'=>1,
-                    'msg'=>'ok',
-                    'result'=>$details->paginate($pagesize)
+                    'code'   => 1,
+                    'msg'    => 'ok',
+                    'result' => $details->paginate($pagesize)
                 ];
-            }else
+            } else
             {
                 return $this->error();
             }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+
+    }
+
+    public function auditor(Request $request)
+    {
+        try
+        {
+            $ta = DB::table('userorg')->where('userid', Auth::id());
+            $deptids = DB::table('userorg')->joinSub($ta, 'ta', 'userorg.userid', '=', 'ta.userid')
+                ->select(['userorg.departmentid']);
+            $tb = DB::table('userorg')->whereIn('departmentid', $deptids)->select([
+                'userorg.userid'
+            ]);
+            $users = DB::table('user')->joinSub($tb, 'tb', 'user.id', '=', 'tb.userid')->select([
+                    'user.id',
+                    'user.name',
+                    'user.usercode'
+                ])->get();
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $users
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+
+    }
+    /*
+     * 报修图片列表
+     */
+    public function repairimgs(Request $request)
+    {
+        try
+        {
+            $repairid = $request->id??0;
+            $imgs = RepairImage::where('repairid',$repairid)->get(['filename']);
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>$imgs
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+
+    }
+    /*
+     * 下一步
+     */
+    public function repair_next(Request $request)
+    {
+        try
+        {
+           $billid = $request->billid??0;
+           $ret = $this->next_step(1,$billid);
+           return $ret;
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+
+    }
+    /*
+     * 拒绝
+     */
+    public function disgree_bill(Request $request)
+    {
+        try
+        {
+           $ret = $this->disgree_process(1,$request->billid??0);
+           if($ret){
+               return $this->success();
+           }else{
+               return $this->error();
+           }
         } catch (Exception $exception)
         {
             return [

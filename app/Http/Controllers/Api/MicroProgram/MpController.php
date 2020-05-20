@@ -22,6 +22,8 @@ class MpController extends Controller
                 'organize.pid',
                 'organize.name'
             ]);
+            $mpfuns = $user->mpfuns()->get();
+            $mpmenus = $user->mpmenus()->get();
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
@@ -32,7 +34,9 @@ class MpController extends Controller
                     'idno'     => $user->idno,
                     'tel'      => $user->tel,
                     'email'    => $user->email,
-                    'orgnode'  => $nodes
+                    'orgnode'  => $nodes,
+                    'funs'     => $mpfuns,
+                    'menus'    => $mpmenus
                 ]
             ];
         } catch (Exception $exception)
@@ -49,12 +53,12 @@ class MpController extends Controller
     {
         try
         {
-           $menus = MpMenu::all();
-           return [
-               'code'=>1,
-               'msg'=>'ok',
-               'result'=>$menus
-           ];
+            $menus = MpMenu::all();
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $menus
+            ];
 
         } catch (Exception $exception)
         {

@@ -33,4 +33,8 @@ class ProcessInfo extends Model
     public $timestamps=false;
     protected $guarded=[];
     protected $with=[];
+
+    public function addusername(){
+        return $this->belongsTo('App\Models\User','adduserid','id');
+    }
 }
