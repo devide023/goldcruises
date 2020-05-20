@@ -107,7 +107,6 @@ Route::middleware('auth:api')->group(function ()
     Route::get('/process/current_step','Api\ProcessController@current_step');
     Route::get('/process/stepusers','Api\ProcessController@stepusers');//获取当前流程审核人
     Route::get('/process/getsetps','Api\ProcessController@getsetplist');//获取流程所有步骤
-    Route::get('/process/billstep','Api\ProcessController@get_billid_step');//获取单据流程节点
     /*
      * 合同管理路由
      */
@@ -139,6 +138,9 @@ Route::middleware('auth:api')->group(function ()
     Route::get('/repair/images','Api\Repair\RepairController@repairimgs');
     Route::get('/repair/nextsetp','Api\Repair\RepairController@repair_next');
     Route::get('/repair/disgree','Api\Repair\RepairController@disgree_bill');
+    Route::get('/repair/dealwithusers','Api\Repair\RepairController@deal_userlist');//维修人员列表
+    Route::post('/repair/sendbill','Api\Repair\RepairController@sendbill');//派单
+    Route::get('/repair/billstepno','Api\Repair\RepairController@billstepno');//单据步骤
     /*
      * 小程序接口
      */

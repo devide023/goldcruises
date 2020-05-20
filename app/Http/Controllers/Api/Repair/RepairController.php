@@ -23,7 +23,8 @@ class RepairController extends Controller
 {
     use DataPermission;
     use AuditIds;
-    use  BusProcess;
+    use BusProcess;
+
     //
     public function list(Request $request)
     {
@@ -142,12 +143,11 @@ class RepairController extends Controller
             $pagesize = $request->pagesize ?? 15;
             $orgids = $this->current_user_datapermission();
 
-            $query = Repair::whereIn('orgid',$orgids);
-            $query = $query->where(function(Builder $q) use ($request){
+            $query = Repair::whereIn('orgid', $orgids);
+            $query = $query->where(function (Builder $q) use ($request)
+            {
                 $uid = Auth::id();
-                return $q->orWhere('adduserid',$uid)
-                    ->orWhere('senduserid',$uid)
-                    ->orWhere('dealuserid',$uid);
+                return $q->orWhere('adduserid', $uid)->orWhere('senduserid', $uid)->orWhere('dealuserid', $uid);
             });
             return [
                 'code'   => 1,
@@ -171,7 +171,7 @@ class RepairController extends Controller
             $pagesize = $request->pagesize ?? 15;
             $query = Repair::query();
             $query = $query->whereIn('id', $this->current_audit_ids(1));
-            $query = $query->whereIn('orgid',$this->current_user_datapermission());
+            $query = $query->whereIn('orgid', $this->current_user_datapermission());
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
@@ -192,8 +192,7 @@ class RepairController extends Controller
         try
         {
             $has = Repair::where('repairno', $request->repairno)->count();
-            $orgid =DB::table('userorg')->where('userid',Auth::id())
-                    ->value('departmentid')??0;
+            $orgid = DB::table('userorg')->where('userid', Auth::id())->value('departmentid') ?? 0;
             if ($has > 0)
             {
                 return [
@@ -212,7 +211,7 @@ class RepairController extends Controller
                 'addusertel' => $request->addusertel,
                 'addtime'    => now(),
                 'note'       => $request->note,
-                'orgid' =>$orgid
+                'orgid'      => $orgid
             ]);
             if ($repair->id > 0)
             {
@@ -546,10 +545,10 @@ class RepairController extends Controller
                 'userorg.userid'
             ]);
             $users = DB::table('user')->joinSub($tb, 'tb', 'user.id', '=', 'tb.userid')->select([
-                    'user.id',
-                    'user.name',
-                    'user.usercode'
-                ])->get();
+                'user.id',
+                'user.name',
+                'user.usercode'
+            ])->get();
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
@@ -564,6 +563,7 @@ class RepairController extends Controller
         }
 
     }
+
     /*
      * 报修图片列表
      */
@@ -571,12 +571,12 @@ class RepairController extends Controller
     {
         try
         {
-            $repairid = $request->id??0;
-            $imgs = RepairImage::where('repairid',$repairid)->get(['filename']);
+            $repairid = $request->id ?? 0;
+            $imgs = RepairImage::where('repairid', $repairid)->get(['filename']);
             return [
-                'code'=>1,
-                'msg'=>'ok',
-                'result'=>$imgs
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $imgs
             ];
         } catch (Exception $exception)
         {
@@ -587,6 +587,7 @@ class RepairController extends Controller
         }
 
     }
+
     /*
      * 下一步
      */
@@ -594,9 +595,9 @@ class RepairController extends Controller
     {
         try
         {
-           $billid = $request->billid??0;
-           $ret = $this->next_step(1,$billid);
-           return $ret;
+            $billid = $request->billid ?? 0;
+            $ret = $this->next_step(1, $billid);
+            return $ret;
         } catch (Exception $exception)
         {
             return [
@@ -604,8 +605,8 @@ class RepairController extends Controller
                 'msg'  => $exception->getMessage()
             ];
         }
-
     }
+
     /*
      * 拒绝
      */
@@ -613,12 +614,14 @@ class RepairController extends Controller
     {
         try
         {
-           $ret = $this->disgree_process(1,$request->billid??0);
-           if($ret){
-               return $this->success();
-           }else{
-               return $this->error();
-           }
+            $ret = $this->disgree_process(1, $request->billid ?? 0);
+            if ($ret)
+            {
+                return $this->success();
+            } else
+            {
+                return $this->error();
+            }
         } catch (Exception $exception)
         {
             return [
@@ -626,7 +629,93 @@ class RepairController extends Controller
                 'msg'  => $exception->getMessage()
             ];
         }
-
     }
 
+    /*
+     * 获取当前登录人组织节点下人员
+     */
+    public function deal_userlist(Request $request)
+    {
+        try
+        {
+            $orgid = DB::table('userorg')->where('userorg.userid', Auth::id())->select(['userorg.departmentid'])
+                ->pluck('departmentid');
+            $users = DB::table('userorg')->join('user', 'userorg.userid', '=', 'user.id')
+                ->whereIn('userorg.departmentid', $orgid)->select([
+                    'user.id',
+                    'user.name'
+                ])->get();
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $users
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
+    /*
+     * 派单
+     */
+    public function sendbill(Request $request)
+    {
+        try
+        {
+            $billid = $request->billid ?? 0;
+            $dealuserid = $request->dealuserid ?? 0;
+            if ($billid > 0 && $dealuserid > 0)
+            {
+                $dealuser = User::find($dealuserid);
+                $ok = Repair::find($billid)->update([
+                    'dealuserid'    => $dealuserid,
+                    'dealperson'    => $dealuser->name,
+                    'dealpersontel' => $dealuser->tel,
+                    'senduserid'    => Auth::id(),
+                    'sendperson'    => Auth::user()->name,
+                    'sendtime'      => now(),
+                    'sendnote'      => $request->note
+                ]);
+                if ($ok)
+                {
+                    $this->next_step(1, $billid);
+                    return $this->success();
+                } else
+                {
+                    return $this->error();
+                }
+            } else
+            {
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+    /*
+     * 获取表单当前步骤
+     */
+    public function billstepno(Request $request)
+    {
+        try
+        {
+            $billid = $request->billid??0;
+            $ret = $this->current_step(1,$billid);
+            return $ret;
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
 }

@@ -21,19 +21,30 @@ trait BusProcess
             if ($bill_id > 0 && $process_id > 0)
             {
                 $totalsteps = \App\Models\BusProcess::find($process_id)->steps()->count();
-                $maxstep = ProcessInfo::where('billid', $bill_id)->where('processid', $process_id)->value('stepno');
-                if (is_null($maxstep))
+                $info = ProcessInfo::where('billid', $bill_id)->where('processid', $process_id)->first();
+                if (!is_null($info))
                 {
-                    $maxstep = 0;
+                    return [
+                        'code'     => 1,
+                        'msg'      => 'ok',
+                        'stepinfo' => [
+                            'totalstep'   => $totalsteps,
+                            'currentstep' => $info->stepno,
+                            'isover'=>$info->isover
+                        ]
+                    ];
+                }else{
+                    return [
+                        'code'     => 0,
+                        'msg'      => '未查询到流程信息',
+                        'stepinfo' => [
+                            'totalstep'   => $totalsteps,
+                            'currentstep' => null,
+                            'isover'=>null
+                        ]
+                    ];
                 }
-                return [
-                    'code'     => 1,
-                    'msg'      => 'ok',
-                    'stepinfo' => [
-                        'totalstep'   => $totalsteps,
-                        'currentstep' => $maxstep
-                    ]
-                ];
+
             } else
             {
                 return [

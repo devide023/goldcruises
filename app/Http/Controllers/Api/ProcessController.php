@@ -124,26 +124,4 @@ class ProcessController extends Controller
 
     }
 
-    public function get_billid_step(Request $request)
-    {
-        try
-        {
-            $billid = $request->billid??0;
-            $stepno = $this->current_step(1,$billid);
-            return [
-                'code'=>1,
-                'msg'=>'ok',
-                'result'=>$stepno
-            ];
-
-        } catch (Exception $exception)
-        {
-            return [
-                'code' => 0,
-                'msg'  => $exception->getMessage()
-            ];
-        }
-
-    }
-
 }
