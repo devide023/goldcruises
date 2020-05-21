@@ -7,6 +7,7 @@ use App\Code\BusProcess;
 use App\Code\DataPermission;
 use App\Http\Controllers\Controller;
 use App\Models\ContractFile;
+use App\Models\ProcessInfo;
 use App\Models\Repair;
 use App\Models\RepairDetail;
 use App\Models\RepairDetailImg;
@@ -26,6 +27,9 @@ class RepairController extends Controller
     use BusProcess;
 
     //
+    /*
+     * 总数据列表
+     */
     public function list(Request $request)
     {
         try
@@ -135,7 +139,9 @@ class RepairController extends Controller
         }
 
     }
-
+    /*
+     * 报修人及维修人所看列表
+     */
     public function myrepairlist(Request $request)
     {
         try
@@ -147,7 +153,7 @@ class RepairController extends Controller
             $query = $query->where(function (Builder $q) use ($request)
             {
                 $uid = Auth::id();
-                return $q->orWhere('adduserid', $uid)->orWhere('senduserid', $uid)->orWhere('dealuserid', $uid);
+                return $q->orWhere('adduserid', $uid)->orWhere('dealuserid', $uid);
             });
             return [
                 'code'   => 1,
@@ -163,7 +169,33 @@ class RepairController extends Controller
         }
 
     }
+    /*
+     * 用户数据权限范围的列表
+     */
+    public function orgrepairlist(Request $request)
+    {
+        try
+        {
+            $pagesize = $request->pagesize ?? 15;
+            $orgids = $this->current_user_datapermission();
+            $query = Repair::whereIn('orgid', $orgids);
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $query->orderBy('id', 'desc')->paginate($pagesize)
+            ];
 
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+    /*
+     * 任务列表
+     */
     public function mytasklist(Request $request)
     {
         try
@@ -700,6 +732,7 @@ class RepairController extends Controller
             ];
         }
     }
+
     /*
      * 获取表单当前步骤
      */
@@ -707,9 +740,49 @@ class RepairController extends Controller
     {
         try
         {
-            $billid = $request->billid??0;
-            $ret = $this->current_step(1,$billid);
+            $billid = $request->billid ?? 0;
+            $ret = $this->current_step(1, $billid);
             return $ret;
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
+    /*
+     * 验收
+     */
+    public function checkbill(Request $request)
+    {
+        try
+        {
+            $billid = $request->billid ?? 0;
+            $ok = Repair::find($billid)->update([
+                'enduserid' => Auth::id(),
+                'enduser'   => Auth::user()->name,
+                'endtime'   => now(),
+                'status'    => '03'
+            ]);
+            if ($ok)
+            {
+                $cnt = ProcessInfo::where('billid', $billid)->where('processid', '=', 1)->where('isover', '=', 0)
+                    ->update([
+                        'isover' => 1
+                    ]);
+                if ($cnt > 0)
+                {
+                    return $this->success();
+                } else
+                {
+                    return $this->error();
+                }
+            } else
+            {
+                return $this->error();
+            }
         } catch (Exception $exception)
         {
             return [
