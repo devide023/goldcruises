@@ -124,7 +124,6 @@ class User extends \Illuminate\Foundation\Auth\User
     public function permissions(){
         return $this->hasMany('App\Models\UserPermission','userid','id');
     }
-
     public function mpfuns()
     {
         return $this->hasMany('App\Models\MpUserFun','userid','id');

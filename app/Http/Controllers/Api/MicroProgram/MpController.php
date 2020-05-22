@@ -8,6 +8,7 @@ use App\Models\Repair;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class MpController extends Controller
 {
@@ -53,7 +54,11 @@ class MpController extends Controller
     {
         try
         {
-            $menus = MpMenu::all();
+            $menus = DB::table('mpusermenu')->join('mpmenu','mpusermenu.mpmenuid','=','mpmenu.id')
+                ->where('mpusermenu',Auth::id())
+                ->select([
+                    'mpmenu.*'
+                ])->get();
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
@@ -68,6 +73,81 @@ class MpController extends Controller
             ];
         }
 
+    }
+
+    public function menuslist(Request $request)
+    {
+        try
+        {
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>MpMenu::all()
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
+    public function usermpsetting(Request $request)
+    {
+        try
+        {
+            $userid = $request->id??0;
+            $user = User::find($userid);
+            $menudata=[];
+            $fundata=[];
+            foreach ($request->mpmenus as $mpmenu){
+                array_push($menudata,['mpmenuid'=>$mpmenu]);
+            }
+            foreach ($request->mpfuns as $mpfun){
+                array_push($fundata,['funid'=>$mpfun]);
+            }
+            $r1 = $user->mpmenus()->createMany($menudata);
+            $r2 = $user->mpfuns()->createMany($fundata);
+            if(count($r1)==count($menudata) && count($r2)==count($fundata)){
+                return $this->success();
+            }
+            else{
+                return $this->error();
+            }
+
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
+    public function getusermpsetting(Request $request)
+    {
+        try
+        {
+            $userid = $request->userid??0;
+            $user = User::find($userid);
+            $funs = $user->mpfuns()->get();
+            $menus = $user->mpmenus()->get();
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>[
+                    'funs'=>$funs,
+                    'menus'=>$menus
+                ]
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
     }
 
 }

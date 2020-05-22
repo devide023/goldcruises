@@ -148,6 +148,9 @@ Route::middleware('auth:api')->group(function ()
      */
     Route::get('/mp/userinfo','Api\MicroProgram\MpController@userinfo');
     Route::get('/mp/menus','Api\MicroProgram\MpController@getmpmenu');
+    Route::get('/mp/menuslist','Api\MicroProgram\MpController@menuslist');
+    Route::post('/mp/user_setting','Api\MicroProgram\MpController@usermpsetting');
+    Route::get('/mp/getusersetting','Api\MicroProgram\MpController@getusermpsetting');
 
 });
 
