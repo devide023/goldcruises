@@ -130,7 +130,8 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/repair/upload/detailimg','Api\Repair\RepairController@uploadrepairdetailimg');
     Route::post('/repair/removeimgs','Api\Repair\RepairController@removeimgs');
     Route::post('/repair/removedetailimgs','Api\Repair\RepairController@remove_detailimgs');
-    Route::post('/repair/savedealinfo','Api\Repair\RepairController@savedealinfo');
+    Route::post('/repair/savedealinfo','Api\Repair\RepairController@savedealinfo');//维修人员提交
+    Route::post('/repair/dealovertask','Api\Repair\RepairController@dealovertask');//维修人员完工处理
     Route::post('/repair/repair_infolist','Api\Repair\RepairController@getrepair_infolist');
     Route::get('/repair/shipauditor','Api\Repair\RepairController@auditor');
     Route::get('/repair/orgrepairlist','Api\Repair\RepairController@orgrepairlist');//数据权限列表

@@ -22,6 +22,8 @@ class CreateMpmenuTable extends Migration
             $table->string('pagepath')->nullable()->default(null)->comment('图标颜色');
             $table->dateTime('addtime')->nullable()->default(null)->comment('录入日期');
             $table->integer('adduserid')->nullable()->default(null)->comment('操作员');
+            $table->string('note')->nullable()->default(null)->comment('备注');
+            $table->integer('seq')->nullable()->default(10)->comment('排序权重');
         });
     }
 

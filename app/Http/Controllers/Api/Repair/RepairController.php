@@ -139,6 +139,7 @@ class RepairController extends Controller
         }
 
     }
+
     /*
      * 报修人及维修人所看列表
      */
@@ -158,7 +159,7 @@ class RepairController extends Controller
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $query->orderBy('id', 'desc')->paginate($pagesize)
+                'result' => $query->orderBy('id', 'asc')->paginate($pagesize)
             ];
         } catch (Exception $exception)
         {
@@ -169,6 +170,7 @@ class RepairController extends Controller
         }
 
     }
+
     /*
      * 用户数据权限范围的列表
      */
@@ -182,7 +184,7 @@ class RepairController extends Controller
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $query->orderBy('id', 'desc')->paginate($pagesize)
+                'result' => $query->orderBy('id', 'asc')->paginate($pagesize)
             ];
 
         } catch (Exception $exception)
@@ -193,6 +195,7 @@ class RepairController extends Controller
             ];
         }
     }
+
     /*
      * 任务列表
      */
@@ -207,7 +210,7 @@ class RepairController extends Controller
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $query->orderBy('id', 'desc')->paginate($pagesize)
+                'result' => $query->orderBy('id', 'asc')->paginate($pagesize)
             ];
         } catch (Exception $exception)
         {
@@ -280,9 +283,6 @@ class RepairController extends Controller
             if (!is_null($repairid))
             {
                 DB::beginTransaction();
-                Repair::where('id', $repairid)->update([
-                    'status' => '02'
-                ]);
                 $detail = RepairDetail::create([
                     'repairid'    => $repairid,
                     'content'     => $request->dealcontent,
@@ -320,6 +320,35 @@ class RepairController extends Controller
             ];
         }
 
+    }
+
+    /*
+     * 维修人员完工处理
+     */
+    public function dealovertask(Request $request)
+    {
+        try
+        {
+            $billid = $request->billid ?? 0;
+            $cnt = RepairDetail::where('repairid', $billid)->count();
+            if ($cnt == 0)
+            {
+                return [
+                    'code' => 0,
+                    'msg'  => '该任务暂未维修记录,不能完工'
+                ];
+            } else
+            {
+                $ret = $this->next_step(1, $billid);
+                return $ret;
+            }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
     }
 
     /*
@@ -432,6 +461,19 @@ class RepairController extends Controller
         }
 
     }
+    private function checkrepairno($repairno)
+    {
+        $has = Repair::where('repairno', $repairno)->count();
+        if ($has == 0)
+        {
+            return $repairno;
+        } else
+        {
+            $no = (int)str_replace('R', '', $repairno) + 1;
+            $tempno = 'R' . str_pad($no, 6, '0', STR_PAD_LEFT);
+            return $this->checkrepairno($tempno);
+        }
+    }
 
     public function getrepairno(Request $request)
     {
@@ -442,7 +484,7 @@ class RepairController extends Controller
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $code
+                'result' => $this->checkrepairno($code)
             ];
         } catch (Exception $exception)
         {
@@ -710,7 +752,8 @@ class RepairController extends Controller
                     'senduserid'    => Auth::id(),
                     'sendperson'    => Auth::user()->name,
                     'sendtime'      => now(),
-                    'sendnote'      => $request->note
+                    'sendnote'      => $request->note,
+                    'status'        => '02'
                 ]);
                 if ($ok)
                 {

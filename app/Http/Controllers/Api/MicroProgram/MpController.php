@@ -55,10 +55,10 @@ class MpController extends Controller
         try
         {
             $menus = DB::table('mpusermenu')->join('mpmenu','mpusermenu.mpmenuid','=','mpmenu.id')
-                ->where('mpusermenu',Auth::id())
+                ->where('mpusermenu.userid',Auth::id())
                 ->select([
                     'mpmenu.*'
-                ])->get();
+                ])->orderBy('seq','asc')->get();
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
@@ -107,12 +107,17 @@ class MpController extends Controller
             foreach ($request->mpfuns as $mpfun){
                 array_push($fundata,['funid'=>$mpfun]);
             }
+            DB::beginTransaction();
+            $user->mpmenus()->delete();
             $r1 = $user->mpmenus()->createMany($menudata);
+            $user->mpfuns()->delete();
             $r2 = $user->mpfuns()->createMany($fundata);
             if(count($r1)==count($menudata) && count($r2)==count($fundata)){
+                DB::commit();
                 return $this->success();
             }
             else{
+                DB::rollBack();
                 return $this->error();
             }
 

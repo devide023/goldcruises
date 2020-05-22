@@ -16,12 +16,12 @@ class CreateMpuserroleTable extends Migration
         Schema::create('mpuserfun', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('userid')->nullable()->default(null)->comment('用户id');
-            $table->string('funid')->nullable()->default(null)->comment('功能id');
+            $table->integer('funid')->nullable()->default(null)->comment('功能id');
         });
         Schema::create('mpusermenu', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('userid')->nullable()->default(null)->comment('用户id');
-            $table->string('mpmenuid')->nullable()->default(null)->comment('功能id');
+            $table->integer('mpmenuid')->nullable()->default(null)->comment('功能id');
         });
     }
 
