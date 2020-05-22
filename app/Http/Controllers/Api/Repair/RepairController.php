@@ -159,7 +159,7 @@ class RepairController extends Controller
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $query->orderBy('id', 'asc')->paginate($pagesize)
+                'result' => $query->orderBy('id', 'desc')->paginate($pagesize)
             ];
         } catch (Exception $exception)
         {
@@ -184,7 +184,7 @@ class RepairController extends Controller
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $query->orderBy('id', 'asc')->paginate($pagesize)
+                'result' => $query->orderBy('id', 'desc')->paginate($pagesize)
             ];
 
         } catch (Exception $exception)
@@ -210,7 +210,7 @@ class RepairController extends Controller
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $query->orderBy('id', 'asc')->paginate($pagesize)
+                'result' => $query->orderBy('id', 'desc')->paginate($pagesize)
             ];
         } catch (Exception $exception)
         {
@@ -335,7 +335,7 @@ class RepairController extends Controller
             {
                 return [
                     'code' => 0,
-                    'msg'  => '该任务暂未维修记录,不能完工'
+                    'msg'  => '未维修请处理'
                 ];
             } else
             {
