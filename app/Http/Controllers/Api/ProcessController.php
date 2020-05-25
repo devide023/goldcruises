@@ -20,7 +20,9 @@ class ProcessController extends Controller
         try {
             $query = BusProcess::query();
             $pagesize = $request->pagesize ?? 15;
-
+            $query->when(!is_null($request->name),function (Builder $q) use ($request){
+               return $q->where('name','like','%'.$request->name.'%');
+            });
             return ['code'   => 1,
                     'msg'    => 'ok',
                     'result' => $query->paginate($pagesize)
@@ -41,8 +43,7 @@ class ProcessController extends Controller
                 'name'      => $request->name,
                 'status'    => $request->status,
                 'adduserid' => Auth::id(),
-                'addtime'   => now(),
-                'orgid'     => $request->orgid
+                'addtime'   => now()
             ]);
             $steps = $request->steps;
             $data = [];
@@ -63,6 +64,15 @@ class ProcessController extends Controller
             }
             $process->steps()
                 ->saveMany($data);
+            $orgdata=[];
+            foreach ($request->orgids as $orgid){
+                array_push($orgdata,[
+                   'orgid'=>$orgid,
+                   'adduserid'=>Auth::id(),
+                   'addtime'=>now()
+                ]);
+            }
+            $process->processorgs()->createMany($orgdata);
             DB::commit();
             if ($process->id > 0) {
                 return $this->success();

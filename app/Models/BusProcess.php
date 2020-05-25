@@ -47,4 +47,8 @@ class BusProcess extends Model
     {
         return $this->hasMany('App\Models\Processstep','processid','id');
     }
+
+    public function processorgs(){
+        return $this->hasMany('App\Models\ProcessOrganize','processid','id');
+    }
 }
