@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\MicroProgram;
 
+use App\Code\AuditIds;
+use App\Code\DataPermission;
 use App\Http\Controllers\Controller;
 use App\Models\MpMenu;
 use App\Models\Repair;
@@ -13,6 +15,8 @@ use Illuminate\Support\Facades\DB;
 class MpController extends Controller
 {
     //
+    use AuditIds;
+    use DataPermission;
     public function userinfo(Request $request)
     {
         try
@@ -54,11 +58,26 @@ class MpController extends Controller
     {
         try
         {
+
+
+            $taskquery = Repair::query();
+            $taskquery = $taskquery->whereIn('id', $this->current_audit_ids(1));
+            $taskcnt = $taskquery->whereIn('orgid', $this->current_user_datapermission())->count();
+
             $menus = DB::table('mpusermenu')->join('mpmenu','mpusermenu.mpmenuid','=','mpmenu.id')
                 ->where('mpusermenu.userid',Auth::id())
                 ->select([
                     'mpmenu.*'
                 ])->orderBy('seq','asc')->get();
+            foreach ($menus as $menu){
+                $has = strstr($menu->pagepath,'tasklist');
+                if($has){
+
+                    $menu->taskcnt = $taskcnt;
+                }else{
+                    $menu->taskcnt = 0;
+                }
+            }
             return [
                 'code'   => 1,
                 'msg'    => 'ok',

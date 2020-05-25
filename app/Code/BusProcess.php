@@ -5,15 +5,13 @@ namespace App\Code;
 
 
 use App\Models\ProcessInfo;
-use App\Models\Processstep;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 trait BusProcess
 {
-
+    use AuditIds;
     public function current_step($process_id, $bill_id)
     {
         try
@@ -73,6 +71,14 @@ trait BusProcess
                 return [
                     'code' => 0,
                     'msg'  => '流程未启动,请提交流程'
+                ];
+            }
+            $ids = $this->current_audit_ids($process_id);
+            $has = in_array($bill_id,$ids);
+            if(!$has){
+                return [
+                    'code' => 0,
+                    'msg'  => '流程已提交'
                 ];
             }
             if ($stepno <= $totalstep)
