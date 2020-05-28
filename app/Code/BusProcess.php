@@ -64,6 +64,7 @@ trait BusProcess
     {
         try
         {
+            $bill_id = (integer)$bill_id;
             $totalstep = \App\Models\BusProcess::find($process_id)->steps()->count();
             $stepno = ProcessInfo::where('processid', $process_id)->where('billid', $bill_id)->value('stepno');
             if (is_null($stepno))
@@ -73,8 +74,8 @@ trait BusProcess
                     'msg'  => '流程未启动,请提交流程'
                 ];
             }
-            $ids = $this->current_audit_ids($process_id);
-            $has = in_array($bill_id,$ids);
+            $ids = $this->current_audit_ids($process_id)->toArray();
+            $has = in_array($bill_id,$ids,true);
             if(!$has){
                 return [
                     'code' => 0,
