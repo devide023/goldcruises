@@ -40,7 +40,7 @@ class BaseInfoController extends Controller
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $query->paginate()
+                'result' => $query->get()
             ];
 
         } catch (Exception $exception)

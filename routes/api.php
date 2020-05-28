@@ -30,6 +30,7 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/user/edit', 'Api\UserController@edit');
     Route::post('/user/chpwd', 'Api\UserController@modifypwd');
     Route::get('/user/info', 'Api\UserController@info');
+    Route::post('/user/updateinfo', 'Api\UserController@chinfo');
     Route::post('/user/headimg', 'Api\UserController@upload_headimg');
     Route::get('/user/find', 'Api\UserController@findbyid');
     Route::post('/user/disable', 'Api\UserController@disable');

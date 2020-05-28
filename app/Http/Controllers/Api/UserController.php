@@ -182,14 +182,15 @@ class UserController extends Controller
         {
             $user = User::find($request->id);
             $nodes = collect($request->orgnodes);
-            $postdata=[];
-            foreach ($nodes as $node){
-                $postdata[$node['id']]=[
-                    'adduserid'=>Auth::id(),
-                    'addtime'=>now(),
-                    'main'=>0,
-                    'companyid'=>$node['parentid']
-                    ];
+            $postdata = [];
+            foreach ($nodes as $node)
+            {
+                $postdata[$node['id']] = [
+                    'adduserid' => Auth::id(),
+                    'addtime'   => now(),
+                    'main'      => 0,
+                    'companyid' => $node['parentid']
+                ];
             }
             $user->orgnodes()->sync($postdata);
             return $this->success();
@@ -205,9 +206,9 @@ class UserController extends Controller
         {
             $user = User::find($request->id);
             return [
-                'code'=>1,
-                'msg'=>'ok',
-                'result'=>$user->orgnodes
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $user->orgnodes
             ];
         } catch (Exception $exception)
         {
@@ -222,18 +223,21 @@ class UserController extends Controller
         {
             $orgids = $request->orgids;
             $user = User::find($request->id);
-            $postdata=[];
-            foreach ($orgids as $orgid){
-                array_push($postdata,[
-                    'orgid'=>$orgid['id'],
-                    'adduserid'=>Auth::id(),
-                    'addtime'=>now()
+            $postdata = [];
+            foreach ($orgids as $orgid)
+            {
+                array_push($postdata, [
+                    'orgid'     => $orgid['id'],
+                    'adduserid' => Auth::id(),
+                    'addtime'   => now()
                 ]);
             }
             $cnt = $user->permissions()->createMany($postdata);
-            if(count($cnt) == count($orgids)){
+            if (count($cnt) == count($orgids))
+            {
                 return $this->success();
-            }else{
+            } else
+            {
                 return $this->error();
             }
         } catch (Exception $exception)
@@ -250,13 +254,13 @@ class UserController extends Controller
     {
         try
         {
-           $userid = $request->id??0;
-           $orgids = DB::table('userpermission')->where('userid',$userid)->pluck('orgid');
-           return [
-               'code'=>1,
-               'msg'=>'ok',
-               'result'=>$orgids
-           ];
+            $userid = $request->id ?? 0;
+            $orgids = DB::table('userpermission')->where('userid', $userid)->pluck('orgid');
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $orgids
+            ];
         } catch (Exception $exception)
         {
             return [
@@ -520,12 +524,12 @@ class UserController extends Controller
                 'email',
                 'headimg'
             ])->first();
-            $deptids = DB::table('userorg')->where('userid',$user->id)->pluck('departmentid');
-            $comids = DB::table('userorg')->where('userid',$user->id)->pluck('companyid');
+            $deptids = DB::table('userorg')->where('userid', $user->id)->pluck('departmentid');
+            $comids = DB::table('userorg')->where('userid', $user->id)->pluck('companyid');
             $user['headimg'] = asset('/storage/' . $user->headimg);
             $user['companyid'] = $comids;
-            $user['orgid']=$deptids;
-            $user['userid'] =$user->id;
+            $user['orgid'] = $deptids;
+            $user['userid'] = $user->id;
             $request['id'] = $user->id;
             $menulist = $this->getusermenus($request);
             return [
@@ -538,6 +542,38 @@ class UserController extends Controller
             throw  $exception;
         }
 
+    }
+
+    public function chinfo(Request $request)
+    {
+        try
+        {
+            $ok = User::where('usercode', $request->usercode)->update([
+                'name'      => $request->name,
+                'sex'       => $request->sex,
+                'tel'       => $request->tel,
+                'email'     => $request->email,
+                'adress'    => $request->adress,
+                'province'  => $request->province,
+                'city'      => $request->city,
+                'district'  => $request->district,
+                'idno'      => $request->idno,
+                'birthdate' => $request->birthdate
+            ]);
+            if ($ok > 0)
+            {
+                return $this->success();
+            } else
+            {
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
     }
 
     public function logout(Request $request)
@@ -598,6 +634,12 @@ class UserController extends Controller
             $ok = Storage::disk('local')->put('/public/' . $filename, file_get_contents($tmpFile));
             if ($ok)
             {
+                if (!is_null($request->userid))
+                {
+                    User::find($request->userid)->update([
+                        'headimg' => $filename
+                    ]);
+                }
                 return [
                     'code'     => 1,
                     'msg'      => '文件上传成功',

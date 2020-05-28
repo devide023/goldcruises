@@ -26,6 +26,7 @@ class CreateOrganizeTalbe extends Migration
             $table->string('logo',1000)->nullable()->default(null)->comment('节点标志');
             $table->integer('adduserid')->nullable()->default(null)->comment('操作人');
             $table->dateTime('addtime')->nullable()->default(now())->comment('操作时间');
+            $table->integer('orgid')->nullable()->default(now())->comment('组织节点id');
         });
         Schema::dropIfExists('userorg');
         Schema::create('userorg', function (Blueprint $table)
