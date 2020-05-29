@@ -38,6 +38,7 @@ class CreateContractTable extends Migration
             $table->string('dutypersontel')->nullable()->default(null)->comment('合同负责人电话');
             $table->integer('adduserid')->nullable()->default(null)->comment('操作人');
             $table->dateTime('addtime')->nullable()->default(null)->comment('操作日期');
+            $table->integer('orgid')->nullable()->default(null)->comment('组织id');
         });
         /*
          * 合同附件

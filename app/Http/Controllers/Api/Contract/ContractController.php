@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Contract;
 use App\Http\Controllers\Controller;
 use App\Models\Contract;
 use App\Models\ContractFile;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -98,6 +99,7 @@ class ContractController extends Controller
             $has = Contract::where('contractno', $contractno)->count();
             if ($has == 0)
             {
+                $orgid = DB::table('userorg')->where('userid', '=', Auth::id())->value('departmentid')??0;
                 $contract = Contract::create([
                     'status'          => $request->status,
                     'contractno'      => $request->contractno,
@@ -117,7 +119,8 @@ class ContractController extends Controller
                     'dutyperson'      => $request->dutyperson,
                     'dutypersontel'   => $request->dutypersontel,
                     'adduserid'       => \Auth::id(),
-                    'addtime'         => now()
+                    'addtime'         => now(),
+                    'orgid'           => $orgid
                 ]);
                 if ($contract->id > 0)
                 {

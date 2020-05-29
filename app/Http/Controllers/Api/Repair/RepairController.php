@@ -205,7 +205,7 @@ class RepairController extends Controller
         {
             $pagesize = $request->pagesize ?? 15;
             $query = Repair::query();
-            $query = $query->whereIn('id', $this->current_audit_ids(1));
+            $query = $query->whereIn('id', $this->current_audit_ids(REPAIR_PROCESS));
             $query = $query->whereIn('orgid', $this->current_user_datapermission());
             return [
                 'code'   => 1,
@@ -339,7 +339,7 @@ class RepairController extends Controller
                 ];
             } else
             {
-                $ret = $this->next_step(1, $billid);
+                $ret = $this->next_step(REPAIR_PROCESS, $billid);
                 return $ret;
             }
         } catch (Exception $exception)
@@ -670,7 +670,7 @@ class RepairController extends Controller
         try
         {
             $billid = $request->billid ?? 0;
-            $ret = $this->next_step(1, $billid);
+            $ret = $this->next_step(REPAIR_PROCESS, $billid);
             return $ret;
         } catch (Exception $exception)
         {
@@ -688,7 +688,7 @@ class RepairController extends Controller
     {
         try
         {
-            $ret = $this->disgree_process(1, $request->billid ?? 0);
+            $ret = $this->disgree_process(REPAIR_PROCESS, $request->billid ?? 0);
             if ($ret)
             {
                 return $this->success();
@@ -757,7 +757,7 @@ class RepairController extends Controller
                 ]);
                 if ($ok)
                 {
-                    $this->next_step(1, $billid);
+                    $this->next_step(REPAIR_PROCESS, $billid);
                     return $this->success();
                 } else
                 {
@@ -784,7 +784,7 @@ class RepairController extends Controller
         try
         {
             $billid = $request->billid ?? 0;
-            $ret = $this->current_step(1, $billid);
+            $ret = $this->current_step(REPAIR_PROCESS, $billid);
             return $ret;
         } catch (Exception $exception)
         {
@@ -811,7 +811,7 @@ class RepairController extends Controller
             ]);
             if ($ok)
             {
-                $cnt = ProcessInfo::where('billid', $billid)->where('processid', '=', 1)->where('isover', '=', 0)
+                $cnt = ProcessInfo::where('billid', $billid)->where('processid', '=', REPAIR_PROCESS)->where('isover', '=', 0)
                     ->update([
                         'isover' => 1
                     ]);

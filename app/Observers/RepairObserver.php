@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Code\BusProcess;
+use App\Models\ProcessInfo;
 use App\Models\ProcessOrganize;
 use App\Models\Repair;
 use Illuminate\Support\Facades\DB;
@@ -23,21 +24,22 @@ class RepairObserver
         $orgid = DB::table('userorg')->where('userid', $repair->adduserid)->value('departmentid');
         if (!is_null($orgid))
         {
-            $processid = ProcessOrganize::where('orgid',$orgid)->value('processid');
-            if(!is_null($processid)){
+            $processid = ProcessOrganize::where('orgid', $orgid)->value('processid');
+            if (!is_null($processid))
+            {
                 $this->submit_process($processid, $repair->id);
-            }
-            else{
+            } else
+            {
                 return [
-                    'code'=>0,
-                    'msg'=>'未找到流程,流程未提交'
+                    'code' => 0,
+                    'msg'  => '未找到流程,流程未提交'
                 ];
             }
-        }
-        else{
+        } else
+        {
             return [
-                'code'=>0,
-                'msg'=>'未设置用户部门信息,流程未提交'
+                'code' => 0,
+                'msg'  => '未设置用户部门信息,流程未提交'
             ];
         }
     }
@@ -63,6 +65,7 @@ class RepairObserver
     public function deleted(Repair $repair)
     {
         //
+        ProcessInfo::where('processid', '=', REPAIR_PROCESS)->where('billid', $repair->id)->delete();
     }
 
     /**
