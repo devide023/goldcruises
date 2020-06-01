@@ -42,7 +42,7 @@ class RepairController extends Controller
             });
             $query->when(!is_null($request->status), function (Builder $q) use ($request)
             {
-                return $q->where('status', $request->stauts);
+                return $q->where('status', $request->status);
             });
             $query->when(!is_null($request->type), function (Builder $q) use ($request)
             {

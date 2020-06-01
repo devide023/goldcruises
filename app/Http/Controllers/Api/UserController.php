@@ -112,7 +112,7 @@ class UserController extends Controller
                 'district'  => $request->district,
                 'adduserid' => Auth::user()->id,
                 'addtime'   => now(),
-                'headimg'   => $request->headimg,
+                'headimg'   => $request->headimg??'default_head.jpg',
                 'api_token' => \hash('sha256', Str::random(50)),
             ]);
             if ($user->id > 0)
@@ -232,14 +232,20 @@ class UserController extends Controller
                     'addtime'   => now()
                 ]);
             }
-            $cnt = $user->permissions()->createMany($postdata);
-            if (count($cnt) == count($orgids))
-            {
+            $ok = $user->permissions()->delete();
+            if(count($orgids)>0){
+                $cnt = $user->permissions()->createMany($postdata);
+                if (count($cnt) == count($orgids))
+                {
+                    return $this->success();
+                } else
+                {
+                    return $this->error();
+                }
+            }else{
                 return $this->success();
-            } else
-            {
-                return $this->error();
             }
+
         } catch (Exception $exception)
         {
             return [

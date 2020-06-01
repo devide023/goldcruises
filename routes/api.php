@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::any('test', 'Api\TestController@test');
+Route::any('test', 'Api\TestController@orgids');
 
 Route::middleware('auth:api')->group(function ()
 {
@@ -104,6 +104,8 @@ Route::middleware('auth:api')->group(function ()
     */
     Route::post('/process/list','Api\ProcessController@list');
     Route::post('/process/add','Api\ProcessController@addprocess');
+    Route::post('/process/update','Api\ProcessController@updateprocess');
+    Route::get('/process/del','Api\ProcessController@delprocess');
     Route::get('/process/current_user_process','Api\ProcessController@get_currentuser_process');
     Route::get('/process/current_step','Api\ProcessController@current_step');
     Route::get('/process/stepusers','Api\ProcessController@stepusers');//获取当前流程审核人

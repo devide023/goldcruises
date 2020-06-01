@@ -36,7 +36,8 @@ class BusProcess extends Model
     public $timestamps=false;
     protected $with=[
         'adduser:id,name',
-        'steps'
+        'steps',
+        'processorgs'
     ];
 
     public function adduser(){

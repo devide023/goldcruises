@@ -24,8 +24,8 @@ class RepairObserver
         $orgid = DB::table('userorg')->where('userid', $repair->adduserid)->value('departmentid');
         if (!is_null($orgid))
         {
-            $processid = ProcessOrganize::where('orgid', $orgid)->value('processid');
-            if (!is_null($processid))
+            $processid = $this->search_orgprocess($orgid);
+            if ($processid>0)
             {
                 $this->submit_process($processid, $repair->id);
             } else

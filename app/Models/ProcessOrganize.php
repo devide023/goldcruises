@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+
 /**
  * App\Models\ProcessOrganize
  *
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $orgid 组织节点id
  * @property int|null $adduserid 操作人
  * @property string|null $addtime 操作日期
+ * @property-read \App\Models\Organize|null $organize
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProcessOrganize newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProcessOrganize newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProcessOrganize query()
@@ -25,8 +27,14 @@ use Illuminate\Database\Eloquent\Model;
 class ProcessOrganize extends Model
 {
     //
-    protected $table='processogranize';
-    protected $guarded=[];
-    public $timestamps=false;
-    protected $with=[];
+    protected $table = 'processogranize';
+    protected $guarded = [];
+    public $timestamps = false;
+    protected $with = ['organize:id,name'];
+
+    public function organize()
+    {
+        return $this->belongsTo('App\Models\Organize', 'orgid', 'id');
+    }
+
 }
