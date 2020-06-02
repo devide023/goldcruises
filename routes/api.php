@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 Route::any('test', 'Api\TestController@orgids');
-
+Route::get('update_apk','Api\UpdateApkController@update');
 Route::middleware('auth:api')->group(function ()
 {
     /*
@@ -141,12 +141,13 @@ Route::middleware('auth:api')->group(function ()
     Route::get('/repair/myrepairlist','Api\Repair\RepairController@myrepairlist');//维修人员查看
     Route::get('/repair/mytasklist','Api\Repair\RepairController@mytasklist');//任务列表
     Route::get('/repair/images','Api\Repair\RepairController@repairimgs');
-    Route::get('/repair/nextsetp','Api\Repair\RepairController@repair_next');
+    Route::get('/repair/nextsetp','Api\Repair\RepairController@repair_next');//下一步流程
     Route::get('/repair/disgree','Api\Repair\RepairController@disgree_bill');
     Route::get('/repair/dealwithusers','Api\Repair\RepairController@deal_userlist');//维修人员列表
     Route::post('/repair/sendbill','Api\Repair\RepairController@sendbill');//派单
     Route::get('/repair/billstepno','Api\Repair\RepairController@billstepno');//单据步骤
     Route::get('/repair/checkbill','Api\Repair\RepairController@checkbill');//验收
+
     /*
      * 小程序接口
      */
