@@ -49,4 +49,7 @@ class RepairDetail extends Model
     public function adduser(){
         return $this->belongsTo('App\Models\User','adduserid','id');
     }
+    public function repair(){
+        return $this->belongsTo('App\Models\Repair','repairid','id');
+    }
 }

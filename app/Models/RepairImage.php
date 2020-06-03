@@ -33,4 +33,9 @@ class RepairImage extends Model
     public $timestamps = false;
     protected $guarded = [];
     protected $with = [];
+
+    public function repair(){
+        return $this->belongsTo('App\Models\Repair','repairid','id');
+    }
+
 }

@@ -33,4 +33,7 @@ class RepairDetailImg extends Model
     public $timestamps = false;
     protected $guarded = [];
     protected $with = [];
+    public function repairdetail(){
+        return $this->belongsTo('App\Models\RepairDetail','detailid','id');
+    }
 }

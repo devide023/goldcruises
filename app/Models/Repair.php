@@ -113,6 +113,9 @@ class Repair extends Model
         return $this->hasMany('App\Models\RepairImage', 'repairid', 'id');
     }
 
+    public function repairusers(){
+        return $this->hasMany('App\Models\RepairUsers','repairid','id');
+    }
 
 
 
