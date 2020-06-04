@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 
+
 /**
  * App\Models\Repair
  *
@@ -27,6 +28,7 @@ use Illuminate\Support\Facades\DB;
  * @property string|null $sendtime 派单时间
  * @property int|null $senduserid 派单人id
  * @property string|null $sendperson 派单人
+ * @property string|null $sendnote 派单备注
  * @property string|null $endtime 完结日期
  * @property int|null $enduserid 完结操作人id
  * @property string|null $enduser 完结操作人
@@ -39,6 +41,8 @@ use Illuminate\Support\Facades\DB;
  * @property-read \App\Models\User|null $endusername
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\RepairImage[] $images
  * @property-read int|null $images_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\RepairUsers[] $repairusers
+ * @property-read int|null $repairusers_count
  * @property-read \App\Models\User|null $sendusername
  * @property-read \App\Models\RepairStatus|null $statusname
  * @property-read \App\Models\RepairType|null $typename
@@ -60,6 +64,7 @@ use Illuminate\Support\Facades\DB;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereNote($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereOrgid($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereRepairno($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereSendnote($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereSendperson($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereSendtime($value)
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Repair whereSenduserid($value)
@@ -82,7 +87,8 @@ class Repair extends Model
         'addusername',
         'sendusername',
         'dealusername',
-        'endusername'
+        'endusername',
+        'repairusers'
     ];
     public function addusername(){
         return $this->belongsTo('App\Models\User','adduserid','id');

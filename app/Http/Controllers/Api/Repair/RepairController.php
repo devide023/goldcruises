@@ -6,7 +6,6 @@ use App\Code\AuditIds;
 use App\Code\BusProcess;
 use App\Code\DataPermission;
 use App\Http\Controllers\Controller;
-use App\Models\ContractFile;
 use App\Models\ProcessInfo;
 use App\Models\Repair;
 use App\Models\RepairDetail;
@@ -150,16 +149,19 @@ class RepairController extends Controller
             $pagesize = $request->pagesize ?? 15;
             $orgids = $this->current_user_datapermission();
 
-            $query = Repair::whereIn('orgid', $orgids);
+            $query = Repair::whereIn('orgid',$orgids);
             $query = $query->where(function (Builder $q) use ($request)
             {
                 $uid = Auth::id();
-                return $q->orWhere('adduserid', $uid)->orWhere('dealuserid', $uid);
+                    $q->orWhere('adduserid', $uid)
+                    ->orWhereHas('repairusers', function (Builder $s) use ($uid){
+                        $s->where('userid',$uid);
+                    });
             });
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $query->orderBy('id', 'desc')->paginate($pagesize)
+                'result' => $query->orderBy('repair.id', 'desc')->paginate($pagesize)
             ];
         } catch (Exception $exception)
         {
@@ -741,14 +743,25 @@ class RepairController extends Controller
         try
         {
             $billid = $request->billid ?? 0;
-            $dealuserid = $request->dealuserid ?? 0;
-            if ($billid > 0 && $dealuserid > 0)
+            $dealuserid = $request->dealuserid ?? [];
+            if ($billid > 0 && count($dealuserid) > 0)
             {
-                $dealuser = User::find($dealuserid);
-                $ok = Repair::find($billid)->update([
-                    'dealuserid'    => $dealuserid,
-                    'dealperson'    => $dealuser->name,
-                    'dealpersontel' => $dealuser->tel,
+                $posdata=[];
+                foreach ($dealuserid as $userid){
+                    array_push($posdata,[
+                        'userid'=>$userid,
+                        'adduserid'=>Auth::id(),
+                        'addtime'=>now()
+                    ]);
+                }
+                $repairobj = Repair::find($billid);
+                $repairobj->repairusers()->delete();
+                $repairobj->repairusers()->createMany($posdata);
+                $tempuser = User::find($dealuserid[0]);
+                $ok = $repairobj->update([
+                    'dealuserid' => $tempuser->id,
+                    'dealperson' => $tempuser->name,
+                    'dealpersontel' => $tempuser->tel,
                     'senduserid'    => Auth::id(),
                     'sendperson'    => Auth::user()->name,
                     'sendtime'      => now(),
