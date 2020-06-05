@@ -157,6 +157,11 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/mp/user_setting','Api\MicroProgram\MpController@usermpsetting');
     Route::get('/mp/getusersetting','Api\MicroProgram\MpController@getusermpsetting');
 
+    /*
+     * 报表
+     */
+    Route::post('/report/shiprepair','Api\Report\RepairReportController@repairship');
+
 });
 
 Route::post('/login', 'Api\UserController@login');
