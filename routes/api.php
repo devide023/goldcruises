@@ -184,6 +184,7 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/hotel/addmeal','Api\Hotel\HotelController@addmeal');
     Route::post('/hotel/editmeal','Api\Hotel\HotelController@editmeal');
     Route::get('/hotel/mealbooklist','Api\Hotel\HotelController@mealbooklist');
+    Route::post('/hotel/addmealbook','Api\Hotel\HotelController@addmealbook');
 
 
 });

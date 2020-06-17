@@ -32,5 +32,9 @@ class Meal extends Model
     protected $table='meal';
     protected $guarded=[];
     public $timestamps=false;
-    protected $with=[];
+    protected $with=['addusername:id,name'];
+
+    public function addusername(){
+        return $this->belongsTo('App\Models\User','adduserid','id');
+    }
 }

@@ -41,7 +41,7 @@ class MealBook extends Model
     protected $table='mealbook';
     protected $guarded=[];
     public $timestamps=false;
-    protected $with=[];
+    protected $with=['details','addusername:id,name','shipname:code,name'];
 
     public function details(){
         return $this->hasMany('App\Models\MealBookDetail','bookid','id');
@@ -49,5 +49,9 @@ class MealBook extends Model
 
     public function addusername(){
         return $this->belongsTo('App\Models\User','adduserid','id');
+    }
+
+    public function shipname(){
+        return $this->belongsTo('App\Models\Ship','shipno','code');
     }
 }

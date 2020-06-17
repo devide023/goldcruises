@@ -248,11 +248,20 @@ class HotelController extends Controller
     {
         try
         {
+            $pagesize = $request->pagesize ?? 15;
             $query = Meal::where('status', '=', 1);
+            $query->when(!is_null($request->status), function (Builder $q) use ($request)
+            {
+                $q->where('status', $request->status);
+            });
+            $query->when(!is_null($request->keyword), function (Builder $q) use ($request)
+            {
+                $q->where('name', 'like', '%' . $request->keyword . '%');
+            });
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $query->get()
+                'result' => $query->paginate($pagesize)
             ];
 
         } catch (Exception $exception)
@@ -273,8 +282,10 @@ class HotelController extends Controller
         {
             $orgid = DB::table('userorg')->where('userid', Auth::id())->value('departmentid') ?? 0;
             $meal = Meal::create([
+                'shipno'    => $request->shipno,
                 'name'      => $request->name,
                 'price'     => $request->price,
+                'note'      => $request->note,
                 'addtime'   => now(),
                 'status'    => 1,
                 'adduserid' => Auth::id(),
@@ -306,8 +317,10 @@ class HotelController extends Controller
             $id = $request->id ?? 0;
             $meal = Meal::find($id);
             $ok = $meal->update([
-                'name'  => $request->name,
-                'price' => $request->price,
+                'shipno' => $request->shipno,
+                'name'   => $request->name,
+                'price'  => $request->price,
+                'note'   => $request->note,
             ]);
             if ($ok)
             {
@@ -335,24 +348,32 @@ class HotelController extends Controller
             $orgid = DB::table('userorg')->where('userid', Auth::id())->value('departmentid') ?? 0;
             DB::beginTransaction();
             $mealbook = MealBook::create([
+                'shipno'    => $request->shipno,
                 'bookname'  => $request->bookname,
                 'booktel'   => $request->booktel,
                 'booknote'  => $request->booknote,
                 'orgid'     => $orgid,
+                'ispayed'   => $request->ispayed ?? 1,
                 'adduserid' => Auth::id(),
                 'addtime'   => now()
             ]);
             $postdata = [];
+            $total = 0;
             foreach ($request->details as $detail)
             {
+                $amount = (double)$detail['qty'] * (double)$detail['price'];
+                $total = $total + $amount;
                 array_push($postdata, [
                     'mealid' => $detail['mealid'],
                     'price'  => $detail['price'],
                     'qty'    => $detail['qty'],
-                    'amount' => (double)$detail['qty'] * (double)$detail['price'],
+                    'amount' => $total,
                 ]);
             }
             $mealbook->details()->createMany($postdata);
+            $mealbook->update([
+                'amount' => $total
+            ]);
             DB::commit();
             if ($mealbook->id > 0)
             {
