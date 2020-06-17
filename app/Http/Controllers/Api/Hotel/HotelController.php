@@ -381,12 +381,14 @@ class HotelController extends Controller
             $pagesize = $request->pagesize ?? 15;
             $query = MealBook::query();
             $orgids = $this->current_user_datapermission();
-            $query->whereIn('orgid',$orgids);
-            $query->when(!is_null($request->bookname),function (Builder $q) use ($request){
-               $q->where('bookname','like','%'.$request->bookname.'%')
+            $query->whereIn('orgid', $orgids);
+            $query->when(!is_null($request->bookname), function (Builder $q) use ($request)
+            {
+                $q->where('bookname', 'like', '%' . $request->bookname . '%');
             });
-            $query->when(!is_null($request->booktel),function (Builder $q) use ($request){
-                $q->where('booktel','like','%'.$request->booktel.'%')
+            $query->when(!is_null($request->booktel), function (Builder $q) use ($request)
+            {
+                $q->where('booktel', 'like', '%' . $request->booktel . '%');
             });
             return [
                 'code'   => 1,
