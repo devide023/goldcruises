@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Route;
 */
 Route::any('test', 'Api\TestController@orgids');
 Route::get('update_apk','Api\UpdateApkController@update');
+Route::get('wechatlogin','Api\WeChatController@login');
+Route::post('/wechat/adduserinfo','Api\WeChatController@addwechatinfo');
+Route::post('/wechat/updateuserinfo','Api\WeChatController@updatewechatinfo');
 Route::middleware('auth:api')->group(function ()
 {
     /*
@@ -158,9 +161,30 @@ Route::middleware('auth:api')->group(function ()
     Route::get('/mp/getusersetting','Api\MicroProgram\MpController@getusermpsetting');
 
     /*
+     * 微信相关
+     */
+
+    /*
      * 报表
      */
     Route::post('/report/shiprepair','Api\Report\RepairReportController@repairship');
+
+
+    /*
+     * 酒店预订
+     */
+    Route::get('/hotel/shiplist','Api\Hotel\HotelController@shiplist');
+    Route::get('/hotel/roomtypelist','Api\Hotel\HotelController@roomtypelist');
+    Route::post('/hotel/addroomtype','Api\Hotel\HotelController@addroomtype');
+    Route::post('/hotel/editroomtype','Api\Hotel\HotelController@editroomtype');
+    Route::post('/hotel/bookroom','Api\Hotel\HotelController@addhotelbook');
+    Route::post('/hotel/bookroomlist','Api\Hotel\HotelController@bookroomlist');
+
+    Route::get('/hotel/meallist','Api\Hotel\HotelController@meallist');
+    Route::post('/hotel/addmeal','Api\Hotel\HotelController@addmeal');
+    Route::post('/hotel/editmeal','Api\Hotel\HotelController@editmeal');
+    Route::get('/hotel/mealbooklist','Api\Hotel\HotelController@mealbooklist');
+
 
 });
 
