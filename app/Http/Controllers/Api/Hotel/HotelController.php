@@ -69,11 +69,14 @@ class HotelController extends Controller
     {
         try
         {
-            $query = RoomType::all();
+            $query = RoomType::query();
+            $query->when(!is_null($request->shipno),function (Builder $q) use ($request){
+               $q->where('shipno',$request->shipno);
+            });
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $query
+                'result' => $query->get()
             ];
 
         } catch (Exception $exception)

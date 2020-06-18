@@ -189,7 +189,9 @@ Route::middleware('auth:api')->group(function ()
     Route::get('/hotel/mealbooklist','Api\Hotel\HotelController@mealbooklist');
     Route::post('/hotel/addmealbook','Api\Hotel\HotelController@addmealbook');
     Route::post('/hotel/editmealbook','Api\Hotel\HotelController@editmealbook');
-
+    //新增代理商控位
+    Route::post('/hotel/add_agentplace','Api\Hotel\AgentPlaceController@add_agent_place');
+    Route::get('/hotel/agent_place_list','Api\Hotel\AgentPlaceController@agent_place_list');
     Route::post('/hotel/report/room_book','Api\Report\HotelReportController@report_room_book');
 
 

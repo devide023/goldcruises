@@ -35,7 +35,7 @@ class AgentPlace extends Model
     protected $table='agentplace';
     protected $guarded=[];
     public $timestamps=false;
-    protected $with=['details','agentname:id,name','addusername:id,name'];
+    protected $with=['details','agentname:id,name','addusername:id,name','shipname:code,name'];
 
     public function details(){
         return $this->hasMany('App\Models\AgentPlaceDetail','agentplaceid','id');
@@ -47,5 +47,9 @@ class AgentPlace extends Model
 
     public function addusername(){
         return $this->belongsTo('App\Models\User','adduserid','id');
+    }
+
+    public function  shipname(){
+        return $this->belongsTo('App\Models\Ship','shipno','code');
     }
 }
