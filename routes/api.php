@@ -173,11 +173,14 @@ Route::middleware('auth:api')->group(function ()
     /*
      * 酒店预订
      */
+
+    Route::get('/hotel/agentlist','Api\Hotel\HotelController@agentlist');
     Route::get('/hotel/shiplist','Api\Hotel\HotelController@shiplist');
     Route::get('/hotel/roomtypelist','Api\Hotel\HotelController@roomtypelist');
     Route::post('/hotel/addroomtype','Api\Hotel\HotelController@addroomtype');
     Route::post('/hotel/editroomtype','Api\Hotel\HotelController@editroomtype');
     Route::post('/hotel/bookroom','Api\Hotel\HotelController@addhotelbook');
+    Route::post('/hotel/edit_bookroom','Api\Hotel\HotelController@edit_hotelbook');
     Route::post('/hotel/bookroomlist','Api\Hotel\HotelController@bookroomlist');
 
     Route::get('/hotel/meallist','Api\Hotel\HotelController@meallist');
@@ -185,6 +188,10 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/hotel/editmeal','Api\Hotel\HotelController@editmeal');
     Route::get('/hotel/mealbooklist','Api\Hotel\HotelController@mealbooklist');
     Route::post('/hotel/addmealbook','Api\Hotel\HotelController@addmealbook');
+    Route::post('/hotel/editmealbook','Api\Hotel\HotelController@editmealbook');
+
+    Route::post('/hotel/report/room_book','Api\Report\HotelReportController@report_room_book');
+
 
 
 });

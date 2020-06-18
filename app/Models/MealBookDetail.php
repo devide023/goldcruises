@@ -32,7 +32,7 @@ class MealBookDetail extends Model
     protected $table='mealbookdetail';
     protected $guarded=[];
     public $timestamps=false;
-    protected $with=[];
+    protected $with=['mealname'];
 
     public function mealname(){
         return $this->belongsTo('App\Models\Meal','mealid','id');

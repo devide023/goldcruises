@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Api\Hotel;
 
 use App\Code\DataPermission;
+use App\Code\TSql;
 use App\Http\Controllers\Controller;
 use App\Models\HotelBook;
 use App\Models\Meal;
 use App\Models\MealBook;
+use App\Models\Organize;
 use App\Models\RoomType;
 use App\Models\Ship;
+use App\Models\Sql;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 class HotelController extends Controller
 {
     use DataPermission;
+    use TSql;
 
     public function shiplist(Request $request)
     {
@@ -28,6 +32,29 @@ class HotelController extends Controller
                 'msg'    => 'ok',
                 'result' => $query
             ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
+    /*
+     * 代理商列表
+     */
+    public function agentlist(Request $request)
+    {
+        try
+        {
+            $query = Organize::where('orgtype', '=', '05')->where('status', '=', 1);
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $query->get()
+            ];
+
         } catch (Exception $exception)
         {
             return [
@@ -117,7 +144,7 @@ class HotelController extends Controller
         }
     }
 
-    //预订
+    //客房预订
     public function addhotelbook(Request $request)
     {
         try
@@ -179,6 +206,67 @@ class HotelController extends Controller
         } catch (Exception $exception)
         {
             DB::rollBack();
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
+    /*
+     * 修改客房预订信息
+     */
+    public function edit_hotelbook(Request $request)
+    {
+        try
+        {
+            $id = $request->id ?? 0;
+            $book = HotelBook::find($id);
+            $dates = $request->hoteldate;
+            if ($dates[0] < date('Y-m-d'))
+            {
+                return [
+                    'code' => 0,
+                    'msg'  => '入住时间须大于等于当前时间'
+                ];
+            }
+            DB::beginTransaction();
+            $ok = $book->update([
+                'shipno'    => $request->shipno,
+                'bdate'     => $dates[0],
+                'edate'     => $dates[1],
+                'bookname'  => $request->bookname,
+                'booktel'   => $request->booktel,
+                'bookcount' => $request->bookcount,
+                'booknote'  => $request->booknote,
+            ]);
+            $postdata = [];
+            $totalamount = 0;
+            foreach ($request->details as $room)
+            {
+                $totalamount = $totalamount + (double)$room['amount'];
+                array_push($postdata, [
+                    'roomtypeid' => $room['roomtypeid'],
+                    'qty'        => $room['qty'],
+                    'price'      => $room['price'],
+                    'amount'     => $room['amount'],
+                ]);
+            }
+            $book->details()->delete();
+            $book->details()->createMany($postdata);
+            $book->update([
+                'amount' => $totalamount
+            ]);
+            DB::commit();
+            if ($ok)
+            {
+                return $this->success();
+            } else
+            {
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
             return [
                 'code' => 0,
                 'msg'  => $exception->getMessage()
@@ -393,6 +481,58 @@ class HotelController extends Controller
     }
 
     /*
+     * 用餐预订修改
+     */
+    public function editmealbook(Request $request)
+    {
+        try
+        {
+            $id = $request->id ?? 0;
+            $mealbook = MealBook::find($id);
+            DB::beginTransaction();
+            $ok = $mealbook->update([
+                'shipno'   => $request->shipno,
+                'bookname' => $request->bookname,
+                'booktel'  => $request->booktel,
+                'booknote' => $request->booknote,
+                'ispayed'  => $request->ispayed ?? 1
+            ]);
+            $postdata = [];
+            $total = 0;
+            foreach ($request->details as $detail)
+            {
+                $amount = (double)$detail['qty'] * (double)$detail['price'];
+                $total = $total + $amount;
+                array_push($postdata, [
+                    'mealid' => $detail['mealid'],
+                    'price'  => $detail['price'],
+                    'qty'    => $detail['qty'],
+                    'amount' => $total,
+                ]);
+            }
+            $mealbook->details()->delete();
+            $mealbook->details()->createMany($postdata);
+            $mealbook->update([
+                'amount' => $total
+            ]);
+            DB::commit();
+            if ($ok)
+            {
+                return $this->success();
+            } else
+            {
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
+    /*
      * 用餐预订列表
      */
     public function mealbooklist(Request $request)
@@ -424,5 +564,7 @@ class HotelController extends Controller
             ];
         }
     }
+
+
 
 }
