@@ -310,4 +310,18 @@ class BaseInfoController extends Controller
         }
 
     }
+
+    public function bookstatus(Request $request)
+    {
+        try
+        {
+
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
 }

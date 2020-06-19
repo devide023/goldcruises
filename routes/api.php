@@ -102,6 +102,7 @@ Route::middleware('auth:api')->group(function ()
     Route::get('/baseinfo/contractstatus', 'Api\BaseInfoController@contractstatus');
     Route::get('/baseinfo/repairstatus', 'Api\BaseInfoController@repairstatus');
     Route::get('/baseinfo/repairtypes', 'Api\BaseInfoController@repairtypes');
+    Route::get('/baseinfo/bookstatus','Api\BaseInfoController@bookstatus');
     /*
     * 流程管理
     */
@@ -176,12 +177,16 @@ Route::middleware('auth:api')->group(function ()
 
     Route::get('/hotel/agentlist','Api\Hotel\HotelController@agentlist');
     Route::get('/hotel/shiplist','Api\Hotel\HotelController@shiplist');
+    Route::get('/hotel/allshiplist','Api\Hotel\HotelController@allshiplist');
+    Route::post('/hotel/add_shiproomtype','Api\Hotel\HotelController@add_shiproomtype');
+    Route::get('/hotel/shiproomtypelist','Api\Hotel\HotelController@shiproomtype_list');
     Route::get('/hotel/roomtypelist','Api\Hotel\HotelController@roomtypelist');
     Route::post('/hotel/addroomtype','Api\Hotel\HotelController@addroomtype');
     Route::post('/hotel/editroomtype','Api\Hotel\HotelController@editroomtype');
     Route::post('/hotel/bookroom','Api\Hotel\HotelController@addhotelbook');
     Route::post('/hotel/edit_bookroom','Api\Hotel\HotelController@edit_hotelbook');
     Route::post('/hotel/bookroomlist','Api\Hotel\HotelController@bookroomlist');
+    Route::post('/hotel/bookroom_ok','Api\Hotel\HotelController@bookroom_ok');
 
     Route::get('/hotel/meallist','Api\Hotel\HotelController@meallist');
     Route::post('/hotel/addmeal','Api\Hotel\HotelController@addmeal');
@@ -191,6 +196,7 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/hotel/editmealbook','Api\Hotel\HotelController@editmealbook');
     //新增代理商控位
     Route::post('/hotel/add_agentplace','Api\Hotel\AgentPlaceController@add_agent_place');
+    Route::post('/hotel/edit_agentplace','Api\Hotel\AgentPlaceController@edit_agent_place');
     Route::get('/hotel/agent_place_list','Api\Hotel\AgentPlaceController@agent_place_list');
     Route::post('/hotel/report/room_book','Api\Report\HotelReportController@report_room_book');
 

@@ -43,8 +43,11 @@ class HotelBook extends Model
     protected $table='hotelbook';
     protected $guarded=[];
     public $timestamps=false;
-    protected $with=['shipname','details','addusername:id,name'];
+    protected $with=['shipname','details','addusername:id,name','statusname:statusid,name'];
 
+    public function statusname(){
+        return $this->belongsTo('App\Models\BookStatus','status','statusid');
+    }
 
     public function details(){
         return $this->hasMany('App\Models\HotelBookDetail','bookid','id');

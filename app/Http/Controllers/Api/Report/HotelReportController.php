@@ -25,16 +25,16 @@ FROM sys_roomtype AS t1
 JOIN
 (
 SELECT ta.orgid,tb.roomtypeid,SUM(qty) AS qty,SUM(price*qty) AS je FROM sys_hotelbook ta JOIN sys_hotelbookdetail tb
-ON ta.id = tb.bookid ';
-            if (!is_null($request->date))
+ON ta.id = tb.bookid and ta.status =2 and curdate()< ta.edate ';
+            /*if (!is_null($request->date))
             {
                 $sql = $sql . ' AND
-( 
+(
 	ta.bdate BETWEEN \'' . $date[0] . '\' AND \'' . $date[1] . '\'
 	OR
 	ta.edate BETWEEN \'' . $date[0] . '\' AND \'' . $date[1] . '\'
 ) ';
-            }
+            }*/
             if(!is_null($roomtypeid)){
                 $sql = $sql . ' and tb.roomtypeid='.$roomtypeid;
             }

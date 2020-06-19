@@ -11,6 +11,7 @@ use App\Models\MealBook;
 use App\Models\Organize;
 use App\Models\RoomType;
 use App\Models\Ship;
+use App\Models\ShipRoomType;
 use App\Models\Sql;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -22,6 +23,9 @@ class HotelController extends Controller
     use DataPermission;
     use TSql;
 
+    /*
+     * 启用状态邮轮
+     */
     public function shiplist(Request $request)
     {
         try
@@ -31,6 +35,91 @@ class HotelController extends Controller
                 'code'   => 1,
                 'msg'    => 'ok',
                 'result' => $query
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
+    public function allshiplist(Request $request)
+    {
+        try
+        {
+            $query = Ship::query();
+            $query->when(!is_null($request->keyword), function (Builder $q) use ($request)
+            {
+                $q->where('name', 'like', '%' . $request->keyword . '%');
+            });
+            $query->when(!is_null($request->status), function (Builder $q) use ($request)
+            {
+                $q->where('status', '=', $request->status);
+            });
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $query->get()
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
+    /*
+     * 邮轮房型
+     */
+    public function add_shiproomtype(Request $request)
+    {
+        try
+        {
+            DB::beginTransaction();
+            ShipRoomType::where('shipno', $request->shipno)->delete();
+            foreach ($request->roomtypes as $roomtype)
+            {
+                $price = RoomType::find($roomtype)->price;
+                ShipRoomType::create([
+                    'shipno'     => $request->shipno,
+                    'roomtypeid' => $roomtype,
+                    'price'      => $price,
+                    'addtime'    => now(),
+                    'addusrid'   => Auth::id()
+                ]);
+            }
+            DB::commit();
+            return $this->success();
+        } catch (Exception $exception)
+        {
+            DB::rollBack();
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
+    /*
+     * 邮轮房型列表
+     */
+    public function shiproomtype_list(Request $request)
+    {
+        try
+        {
+            $query = ShipRoomType::query();
+            $query->when(!is_null($request->shipno), function (Builder $q) use ($request)
+            {
+                $q->where('shipno', $request->shipno);
+            });
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $query->get()
             ];
         } catch (Exception $exception)
         {
@@ -70,8 +159,13 @@ class HotelController extends Controller
         try
         {
             $query = RoomType::query();
-            $query->when(!is_null($request->shipno),function (Builder $q) use ($request){
-               $q->where('shipno',$request->shipno);
+            $query->when(!is_null($request->name), function (Builder $q) use ($request)
+            {
+                $q->where('name', 'like', '%' . $request->name . '%');
+            });
+            $query->when(!is_null($request->status), function (Builder $q) use ($request)
+            {
+                $q->where('status', $request->status);
             });
             return [
                 'code'   => 1,
@@ -95,7 +189,6 @@ class HotelController extends Controller
         {
             $roomtype = RoomType::create([
                 'status'    => 1,
-                'shipno'    => $request->shipno,
                 'name'      => $request->name,
                 'price'     => $request->price,
                 'totalqty'  => $request->totalqty,
@@ -126,7 +219,6 @@ class HotelController extends Controller
         {
             $roomtype = RoomType::find($request->id);
             $ok = $roomtype->update([
-                'shipno'   => $request->shipno,
                 'name'     => $request->name,
                 'price'    => $request->price,
                 'totalqty' => $request->totalqty
@@ -330,6 +422,32 @@ class HotelController extends Controller
         }
     }
 
+    /*
+     * 客房预订确认
+     */
+    public function bookroom_ok(Request $request)
+    {
+        try
+        {
+            $id = $request->id ?? 0;
+            $ok = HotelBook::where('id', $id)->where('status', '=', 1)->update([
+                    'status' => $request->status
+                ]);
+            if ($ok)
+            {
+                return $this->success();
+            } else
+            {
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
 
     /*
      * 套餐列表
@@ -567,7 +685,6 @@ class HotelController extends Controller
             ];
         }
     }
-
 
 
 }
