@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Hotel;
 
 use App\Code\DataPermission;
+use App\Code\RemainRoomTypeQty;
 use App\Code\TSql;
 use App\Http\Controllers\Controller;
 use App\Models\HotelBook;
@@ -22,6 +23,7 @@ class HotelController extends Controller
 {
     use DataPermission;
     use TSql;
+    use RemainRoomTypeQty;
 
     /*
      * 启用状态邮轮
@@ -63,6 +65,30 @@ class HotelController extends Controller
                 'msg'    => 'ok',
                 'result' => $query->get()
             ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
+    public function enable_ship(Request $request)
+    {
+        try
+        {
+            $shipid = $request->id ?? 0;
+            $ok = Ship::find($shipid)->update([
+                'status' => $request->status
+            ]);
+            if ($ok)
+            {
+                return $this->success();
+            } else
+            {
+                return $this->error();
+            }
         } catch (Exception $exception)
         {
             return [
@@ -261,6 +287,53 @@ class HotelController extends Controller
                     'msg'  => '入住时间须大于等于当前时间'
                 ];
             }
+
+            $postdata = [];
+            $totalamount = 0;
+            $roomtypeids = [];
+            foreach ($request->details as $room)
+            {
+                $totalamount = $totalamount + (double)$room['amount'];
+                array_push($roomtypeids, $room['roomtypeid']);
+                array_push($postdata, [
+                    'roomtypeid' => $room['roomtypeid'],
+                    'qty'        => $room['qty'],
+                    'price'      => $room['price'],
+                    'amount'     => $room['amount'],
+                ]);
+            }
+            $errors = [];
+            $remain_qty = collect($this->roomtype_remain_qty($request->shipno, $orgid, $roomtypeids));
+            foreach ($postdata as $item)
+            {
+                $totalqty = $remain_qty->where('roomtypeid', $item['roomtypeid'])->first()->qty;
+                $qty1 = $remain_qty->where('roomtypeid', $item['roomtypeid'])->first()->qty1;
+                $rqty = $remain_qty->where('roomtypeid', $item['roomtypeid'])->first()->rqty;
+                $cnt = $rqty - $item['qty'];
+                if ($cnt <= 0)
+                {
+                    $roomtype = RoomType::find($item['roomtypeid']);
+                    array_push($errors, [
+                        'roomtypename' => $roomtype->name,
+                        'totalqty'     => $totalqty,
+                        'bookedqty'    => $qty1,
+                        'remainqty'    => $rqty
+                    ]);
+                }
+            }
+            if (count($errors) > 0)
+            {
+                $msg = '';
+                foreach ($errors as $error)
+                {
+                    $msg = $msg . $error['roomtypename'] . '总数:' . $error['totalqty'].'已订:'.$error['bookedqty'];
+                }
+                return [
+                    'code'   => 0,
+                    'msg'    => $msg . '预订超标',
+                    'result' => $errors
+                ];
+            }
             $book = HotelBook::create([
                 'shipno'    => $request->shipno,
                 'bdate'     => $dates[0],
@@ -274,18 +347,6 @@ class HotelController extends Controller
                 'addtime'   => now(),
                 'orgid'     => $orgid
             ]);
-            $postdata = [];
-            $totalamount = 0;
-            foreach ($request->details as $room)
-            {
-                $totalamount = $totalamount + (double)$room['amount'];
-                array_push($postdata, [
-                    'roomtypeid' => $room['roomtypeid'],
-                    'qty'        => $room['qty'],
-                    'price'      => $room['price'],
-                    'amount'     => $room['amount'],
-                ]);
-            }
             $book->details()->createMany($postdata);
             $book->update([
                 'amount' => $totalamount
@@ -431,8 +492,8 @@ class HotelController extends Controller
         {
             $id = $request->id ?? 0;
             $ok = HotelBook::where('id', $id)->where('status', '=', 1)->update([
-                    'status' => $request->status
-                ]);
+                'status' => $request->status
+            ]);
             if ($ok)
             {
                 return $this->success();

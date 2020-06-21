@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Api\Report;
 
+use App\Code\MyArrayTool;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class HotelReportController extends Controller
 {
+    use MyArrayTool;
+
     //
     /*
      * 房间预订报表
@@ -19,40 +22,88 @@ class HotelReportController extends Controller
             $date = $request->date;
             $orgid = $request->agent;
             $roomtypeid = $request->roomtype;
-            $sql = 'SELECT t1.name,t2.* ,
-(SELECT NAME FROM sys_organize WHERE id = t2.orgid) AS orgname
-FROM sys_roomtype AS t1
-JOIN
-(
-SELECT ta.orgid,tb.roomtypeid,SUM(qty) AS qty,SUM(price*qty) AS je FROM sys_hotelbook ta JOIN sys_hotelbookdetail tb
-ON ta.id = tb.bookid and ta.status =2 and curdate()< ta.edate ';
-            /*if (!is_null($request->date))
+            $sql = 'select 
+                  t1.*,
+                  (select 
+                    ifnull(sum(qty), 0) 
+                  from
+                    sys_agentplace a,
+                    sys_agentplacedetail b 
+                  where a.id = b.agentplaceid 
+                    and a.agentid = t1.orgid 
+                    and a.shipno = t1.shipno 
+                    and b.roomtypeid = t1.roomtypeid) as totalqty,
+                  t2.name as agentname,
+                  t3.name as shipname,
+                  t4.name as roomtypename 
+                from
+                  (select 
+                    ta.orgid,
+                    ta.shipno,
+                    tb.roomtypeid,
+                    sum(tb.qty) as qty,
+                    sum(tb.amount) as amount 
+                  from
+                    sys_hotelbook ta,
+                    sys_hotelbookdetail tb 
+                  where ta.id = tb.bookid 
+                    and curdate() < ta.edate 
+                    and ta.status in (1, 2)
+                    ';
+            if (!is_null($request->shipno))
             {
-                $sql = $sql . ' AND
-(
-	ta.bdate BETWEEN \'' . $date[0] . '\' AND \'' . $date[1] . '\'
-	OR
-	ta.edate BETWEEN \'' . $date[0] . '\' AND \'' . $date[1] . '\'
-) ';
-            }*/
-            if(!is_null($roomtypeid)){
-                $sql = $sql . ' and tb.roomtypeid='.$roomtypeid;
+                $sql = $sql . ' and ta.shpno =\'' . $request->shipno . '\'';
             }
-            if (!is_null($orgid))
+            if (!is_null($request->agentid))
             {
-
-                $sql = $sql . ' AND ta.orgid = ' . $orgid;
+                $sql = $sql . ' and ta.orgid =' . $request->agentid;
             }
-
-            $sql = $sql . ' GROUP BY ta.orgid,tb.roomtypeid
-) t2
-ON t1.id = t2.roomtypeid
-ORDER BY t2.orgid ASC';
-            $result = DB::select( strtolower($sql));
+            if (!is_null($request->roomtypeid))
+            {
+                $sql = $sql . ' and tb.roomtypeid =' . $request->roomtypeid;
+            }
+            $sql = $sql . ' group by ta.orgid,
+                        ta.shipno,
+                        tb.roomtypeid) t1,
+                      sys_organize t2,
+                      sys_ship t3,
+                      sys_roomtype t4 
+                    where t1.orgid = t2.id 
+                      and t1.shipno = t3.code 
+                      and t1.roomtypeid = t4.id ';
+            $result = DB::select(strtolower($sql));
+            $orgialdata = collect($result);
+            $agentlist = $this->array_columns($result, 'orgid,shipno,agentname,shipname');
+            $datas = collect($agentlist)->unique();
+            $res = [];
+            foreach ($datas as $data)
+            {
+                $roomtypes = [];
+                $agentid = $data['orgid'];
+                $shipno = $data['shipno'];
+                $rooms = $orgialdata->where('orgid', $agentid)->where('shipno', $shipno);
+                foreach ($rooms as $room)
+                {
+                    array_push($roomtypes, [
+                        'roomtypeid'   => $room->roomtypeid,
+                        'roomtypename' => $room->roomtypename,
+                        'qty'          => $room->qty,
+                        'totalqty'     => $room->totalqty,
+                        'amount'       => $room->amount
+                    ]);
+                }
+                array_push($res, [
+                    'agentid'   => $agentid,
+                    'agentname' => $data['agentname'],
+                    'shipno'    => $shipno,
+                    'shipname'  => $data['shipname'],
+                    'roomtypes' => $roomtypes
+                ]);
+            }
             return [
                 'code'   => 1,
                 'msg'    => 'ok',
-                'result' => $result
+                'result' => $res
             ];
         } catch (Exception $exception)
         {
@@ -62,4 +113,6 @@ ORDER BY t2.orgid ASC';
             ];
         }
     }
+
+
 }

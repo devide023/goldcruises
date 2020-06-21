@@ -32,6 +32,7 @@ Route::middleware('auth:api')->group(function ()
     Route::get('/user/routes', 'Api\UserController@userroutes');
     Route::post('/user/edit', 'Api\UserController@edit');
     Route::post('/user/chpwd', 'Api\UserController@modifypwd');
+    Route::post('/user/changepwd', 'Api\UserController@changepwd');
     Route::get('/user/info', 'Api\UserController@info');
     Route::post('/user/updateinfo', 'Api\UserController@chinfo');
     Route::post('/user/headimg', 'Api\UserController@upload_headimg');
@@ -178,6 +179,7 @@ Route::middleware('auth:api')->group(function ()
     Route::get('/hotel/agentlist','Api\Hotel\HotelController@agentlist');
     Route::get('/hotel/shiplist','Api\Hotel\HotelController@shiplist');
     Route::get('/hotel/allshiplist','Api\Hotel\HotelController@allshiplist');
+    Route::get('/hotel/enableship','Api\Hotel\HotelController@enable_ship');
     Route::post('/hotel/add_shiproomtype','Api\Hotel\HotelController@add_shiproomtype');
     Route::get('/hotel/shiproomtypelist','Api\Hotel\HotelController@shiproomtype_list');
     Route::get('/hotel/roomtypelist','Api\Hotel\HotelController@roomtypelist');

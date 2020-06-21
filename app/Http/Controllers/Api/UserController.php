@@ -112,7 +112,7 @@ class UserController extends Controller
                 'district'  => $request->district,
                 'adduserid' => Auth::user()->id,
                 'addtime'   => now(),
-                'headimg'   => $request->headimg??'default_head.jpg',
+                'headimg'   => $request->headimg ?? 'default_head.jpg',
                 'api_token' => \hash('sha256', Str::random(50)),
             ]);
             if ($user->id > 0)
@@ -233,7 +233,8 @@ class UserController extends Controller
                 ]);
             }
             $ok = $user->permissions()->delete();
-            if(count($orgids)>0){
+            if (count($orgids) > 0)
+            {
                 $cnt = $user->permissions()->createMany($postdata);
                 if (count($cnt) == count($orgids))
                 {
@@ -242,7 +243,8 @@ class UserController extends Controller
                 {
                     return $this->error();
                 }
-            }else{
+            } else
+            {
                 return $this->success();
             }
 
@@ -414,6 +416,49 @@ class UserController extends Controller
 
     }
 
+    public function changepwd(Request $request)
+    {
+        try
+        {
+            $userid = $request->userid ?? 0;
+            $user = User::find($userid);
+            if ($userid > 0)
+            {
+                $oldpwd = $request->oldpwd;
+                $newpwd = $request->newpwd;
+                $enoldpwd = \hash('sha256', $oldpwd);
+                if ($enoldpwd == $user->userpwd)
+                {
+                    $ok = $user->update([
+                        'userpwd' => \hash('sha256', $newpwd)
+                    ]);
+                    if ($ok)
+                    {
+                        return $this->success();
+                    } else
+                    {
+                        return $this->error();
+                    }
+                } else
+                {
+                    return [
+                        'code' => 0,
+                        'msg'  => '密码错误'
+                    ];
+                }
+            } else
+            {
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
     public function login(Request $request)
     {
         try
@@ -532,9 +577,13 @@ class UserController extends Controller
             ])->first();
             $deptids = DB::table('userorg')->where('userid', $user->id)->pluck('departmentid');
             $comids = DB::table('userorg')->where('userid', $user->id)->pluck('companyid');
+            $depid = count($deptids) > 0 ? $deptids[0] : 0;
+            $organize = Organize::find($depid);
+            $orgtype = !is_null($organize) ? $organize->value('orgtype') : '';
             $user['headimg'] = asset('/storage/' . $user->headimg);
-            $user['companyid'] = $comids;
-            $user['orgid'] = $deptids;
+            $user['companyid'] = count($comids) > 0 ? $comids[0] : 0;
+            $user['orgid'] = count($deptids) > 0 ? $deptids[0] : 0;
+            $user['orgtype'] = $orgtype;
             $user['userid'] = $user->id;
             $request['id'] = $user->id;
             $menulist = $this->getusermenus($request);
