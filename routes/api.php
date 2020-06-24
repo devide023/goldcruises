@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::any('test', 'Api\TestController@orgids');
+Route::any('test', 'Api\TestController@test');
 Route::get('update_apk','Api\UpdateApkController@update');
 Route::get('wechatlogin','Api\WeChatController@login');
 Route::post('/wechat/adduserinfo','Api\WeChatController@addwechatinfo');

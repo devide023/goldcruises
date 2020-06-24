@@ -60,6 +60,7 @@ trait RemainRoomTypeQty
                     on t1.shipno = t2.shipno 
                     and t1.agentid = t2.orgid 
                     and t1.roomtypeid = t2.roomtypeid ';
+            //var_dump($sql);
             $result = DB::select($sql);
             return $result;
         } catch (Exception $exception)

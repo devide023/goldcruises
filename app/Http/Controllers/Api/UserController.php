@@ -579,7 +579,7 @@ class UserController extends Controller
             $comids = DB::table('userorg')->where('userid', $user->id)->pluck('companyid');
             $depid = count($deptids) > 0 ? $deptids[0] : 0;
             $organize = Organize::find($depid);
-            $orgtype = !is_null($organize) ? $organize->value('orgtype') : '';
+            $orgtype = !is_null($organize) ? $organize->orgtype : '';
             $user['headimg'] = asset('/storage/' . $user->headimg);
             $user['companyid'] = count($comids) > 0 ? $comids[0] : 0;
             $user['orgid'] = count($deptids) > 0 ? $deptids[0] : 0;

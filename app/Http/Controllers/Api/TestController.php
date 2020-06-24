@@ -10,15 +10,34 @@ use Illuminate\Support\Facades\Hash;
 class TestController extends Controller
 {
     use DataPermission;
+
     //
     public function test(Request $request)
     {
         try
         {
-           $pwd = hash('sha256','123456');
-           $pwd1 = Hash::make('123456');
-           var_dump($pwd);
-           var_dump($pwd1);
+            $a = [
+                [
+                    'userid'   => 1,
+                    'username' => 'a',
+                    'cnt'      => 3
+                ],
+                [
+                    'userid'   => 2,
+                    'username' => 'b',
+                    'cnt'      => 4
+                ],
+                [
+                    'userid'   => 3,
+                    'username' => 'c',
+                    'cnt'      => 5
+                ]
+            ];
+            return collect($a)->map(function ($item)
+            {
+                return collect($item)->only(['userid','cnt']);
+            });
+
 
         } catch (Exception $exception)
         {
@@ -32,9 +51,9 @@ class TestController extends Controller
         try
         {
             return [
-                'code'=>1,
-                'msg'=>'ok',
-                'result'=>$this->current_user_datapermission()
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $this->current_user_datapermission()
             ];
         } catch (Exception $exception)
         {
