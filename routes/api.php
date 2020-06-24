@@ -201,6 +201,7 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/hotel/edit_agentplace','Api\Hotel\AgentPlaceController@edit_agent_place');
     Route::get('/hotel/agent_place_list','Api\Hotel\AgentPlaceController@agent_place_list');
     Route::post('/hotel/report/room_book','Api\Report\HotelReportController@report_room_book');
+    Route::get('/hotel/report/cur_room_book','Api\Report\HotelReportController@current_bookroom_qty');
 
 
 

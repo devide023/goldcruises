@@ -228,6 +228,7 @@ class HotelController extends Controller
             $roomtype = RoomType::create([
                 'status'    => 1,
                 'name'      => $request->name,
+                'shortname'=>$request->shortname,
                 'price'     => $request->price,
                 'totalqty'  => $request->totalqty,
                 'addtime'   => now(),
@@ -258,6 +259,7 @@ class HotelController extends Controller
             $roomtype = RoomType::find($request->id);
             $ok = $roomtype->update([
                 'name'     => $request->name,
+                'shortname'     => $request->shortname,
                 'price'    => $request->price,
                 'totalqty' => $request->totalqty
             ]);
@@ -526,6 +528,9 @@ class HotelController extends Controller
             $query->when(!is_null($request->name), function (Builder $q) use ($request)
             {
                 $q->where('bookname', 'like', '%' . $request->name . '%');
+            });
+            $query->when(!is_null($request->agentid),function (Builder $q) use ($request){
+               $q->where('orgid',$request->agentid);
             });
             return [
                 'code'   => 1,
@@ -806,6 +811,10 @@ class HotelController extends Controller
             ];
         }
     }
+
+    /*
+     * 当天用房数量
+     */
 
 
 }

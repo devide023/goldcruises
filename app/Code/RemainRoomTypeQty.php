@@ -71,4 +71,54 @@ trait RemainRoomTypeQty
             ];
         }
     }
+
+    public function curdate_bookroomtype_qty($rq, $agentid)
+    {
+        try
+        {
+            $tsql = 'select ifnull(sum(bookcount),0) cnt from sys_hotelbook where status in(1,2)  and shipno=\'05\' and bdate=\'' . $rq . '\'';
+            if (!is_null($agentid))
+            {
+                $tsql = $tsql . ' and orgid =' . $agentid;
+            }
+            $cnt = collect(DB::select($tsql))->first()->cnt;
+            $sql = 'select 
+                      t1.*,
+                      t2.name as shipname,
+                      t3.name as roomtypename 
+                    from
+                      (select 
+                        ta.shipno,
+                        tb.roomtypeid,
+                        sum(tb.qty) as qty 
+                      from
+                        sys_hotelbook ta,
+                        sys_hotelbookdetail tb 
+                      where ta.id = tb.bookid 
+                        and ta.status in (1, 2) 
+                        and ta.bdate = \'' . $rq . '\'';
+            if (!is_null($agentid))
+            {
+
+                $sql = $sql . ' and ta.orgid=' . $agentid;
+            }
+            $sql = $sql . ' group by ta.shipno,
+                        tb.roomtypeid) as t1,
+                      sys_ship t2,
+                      sys_roomtype t3 
+                    where t1.shipno = t2.code 
+                      and t1.roomtypeid = t3.id';
+            $qty = DB::select($sql);
+            return [
+                'personqty'   => $cnt,
+                'roomtypeqty' => $qty
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
 }

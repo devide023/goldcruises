@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class OrganizeController extends Controller
 {
@@ -161,7 +162,7 @@ class OrganizeController extends Controller
                 'status'    => 1,
                 'pid'       => $request->id,
                 'name'      => '新节点',
-                'orgcode'   => $this->createorgcode($request->id),
+                'orgcode'   => Str::random(4),
                 'orgtype'   => $request->id == 0 ? '01' : '03',
                 'adduserid' => Auth::id(),
                 'addtime'   => now()

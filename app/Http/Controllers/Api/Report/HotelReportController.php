@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Report;
 
 use App\Code\MyArrayTool;
+use App\Code\RemainRoomTypeQty;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 class HotelReportController extends Controller
 {
     use MyArrayTool;
-
+    use RemainRoomTypeQty;
     //
     /*
      * 房间预订报表
@@ -113,6 +114,27 @@ class HotelReportController extends Controller
             ];
         }
     }
-
-
+    /*
+     * 当日房间预订情况
+     */
+    public function current_bookroom_qty(Request $request)
+    {
+        try
+        {
+            $rq = $request->rq??date('Y-m-d');
+            $agentid = $request->agentid;
+            $result = $this->curdate_bookroomtype_qty($rq,$agentid);
+            return [
+                'code'=>1,
+                'msg'=>'ok',
+                'result'=>$result
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
 }
