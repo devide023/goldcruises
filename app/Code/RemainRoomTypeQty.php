@@ -76,7 +76,7 @@ trait RemainRoomTypeQty
     {
         try
         {
-            $tsql = 'select ifnull(sum(bookcount),0) cnt from sys_hotelbook where status in(1,2)  and shipno=\'05\' and bdate=\'' . $rq . '\'';
+            $tsql = 'select ifnull(sum(bookcount),0) cnt from sys_hotelbook where status in(1,2)  and shipno=\'05\' and (bdate=\'' . $rq . '\' or (curdate()>=bdate and curdate()<edate) )';
             if (!is_null($agentid))
             {
                 $tsql = $tsql . ' and orgid =' . $agentid;
@@ -96,7 +96,7 @@ trait RemainRoomTypeQty
                         sys_hotelbookdetail tb 
                       where ta.id = tb.bookid 
                         and ta.status in (1, 2) 
-                        and ta.bdate = \'' . $rq . '\'';
+                        and (ta.bdate = \'' . $rq . '\' or (curdate()>=ta.bdate and curdate()<ta.edate) )';
             if (!is_null($agentid))
             {
 

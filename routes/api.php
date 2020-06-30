@@ -188,6 +188,7 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/hotel/bookroom','Api\Hotel\HotelController@addhotelbook');
     Route::post('/hotel/edit_bookroom','Api\Hotel\HotelController@edit_hotelbook');
     Route::post('/hotel/bookroomlist','Api\Hotel\HotelController@bookroomlist');
+    Route::post('/hotel/bookroomlist_new','Api\Hotel\HotelController@bookroomlist_new');
     Route::post('/hotel/bookroom_ok','Api\Hotel\HotelController@bookroom_ok');
 
     Route::get('/hotel/meallist','Api\Hotel\HotelController@meallist');
@@ -202,7 +203,13 @@ Route::middleware('auth:api')->group(function ()
     Route::get('/hotel/agent_place_list','Api\Hotel\AgentPlaceController@agent_place_list');
     Route::post('/hotel/report/room_book','Api\Report\HotelReportController@report_room_book');
     Route::get('/hotel/report/cur_room_book','Api\Report\HotelReportController@current_bookroom_qty');
-
+    Route::post('/hotel/report/date_roombook','Api\Report\HotelReportController@date_roombook_report');
+    Route::post('/hotel/report/date_roombook_detail','Api\Report\HotelReportController@date_bookreport_detial');
+    //时间控位
+    Route::get('/hotel/agentplace_date_list','Api\Hotel\AgentPlaceController@agentplace_date_list');
+    Route::post('/hotel/agentplace_date','Api\Hotel\AgentPlaceController@add_agentplace_date');
+    Route::post('/hotel/edit_agentplace_date','Api\Hotel\AgentPlaceController@edit_agentplace_date');
+    Route::post('/hotel/agentplace_date_status','Api\Hotel\AgentPlaceController@agentplace_date_status');
 
 
 });

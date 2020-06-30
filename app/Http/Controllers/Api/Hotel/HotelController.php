@@ -228,7 +228,7 @@ class HotelController extends Controller
             $roomtype = RoomType::create([
                 'status'    => 1,
                 'name'      => $request->name,
-                'shortname'=>$request->shortname,
+                'shortname' => $request->shortname,
                 'price'     => $request->price,
                 'totalqty'  => $request->totalqty,
                 'addtime'   => now(),
@@ -258,10 +258,10 @@ class HotelController extends Controller
         {
             $roomtype = RoomType::find($request->id);
             $ok = $roomtype->update([
-                'name'     => $request->name,
-                'shortname'     => $request->shortname,
-                'price'    => $request->price,
-                'totalqty' => $request->totalqty
+                'name'      => $request->name,
+                'shortname' => $request->shortname,
+                'price'     => $request->price,
+                'totalqty'  => $request->totalqty
             ]);
             if ($ok)
             {
@@ -509,6 +509,12 @@ class HotelController extends Controller
                         $request->checkindate[0] . ' 0:0:0',
                         $request->checkindate[1] . ' 23:59:59'
                     ]);
+                    $q->orWhere(function (Builder $s) use ($request)
+                    {
+                        $s->where('bdate', '<=', date('Y-m-d'))
+                            ->where('edate', '>', date('Y-m-d'));
+
+                    });
                 });
             }
             if (!is_null($request->checkoutdate))
@@ -529,8 +535,9 @@ class HotelController extends Controller
             {
                 $q->where('bookname', 'like', '%' . $request->name . '%');
             });
-            $query->when(!is_null($request->agentid),function (Builder $q) use ($request){
-               $q->where('orgid',$request->agentid);
+            $query->when(!is_null($request->agentid), function (Builder $q) use ($request)
+            {
+                $q->where('orgid', $request->agentid);
             });
             return [
                 'code'   => 1,
@@ -545,7 +552,69 @@ class HotelController extends Controller
             ];
         }
     }
+    /*
+     * dd
+     */
+    public function bookroomlist_new(Request $request)
+    {
+        try
+        {
+            $pagesize = $request->pagesize;
+            $query = HotelBook::query();
+            $orgids = $this->current_user_datapermission();
+            $query->whereIn('orgid', $orgids);
+            if (!is_null($request->checkindate))
+            {
+                $query->when(count($request->checkindate) == 2, function (Builder $q) use ($request)
+                {
+                    $q->whereBetween('bdate', [
+                        $request->checkindate[0] . ' 0:0:0',
+                        $request->checkindate[1] . ' 23:59:59'
+                    ]);
+                    $q->orWhere(function (Builder $s) use ($request)
+                    {
+                        $s->where('bdate', '<=', date('Y-m-d'))
+                            ->where('edate', '>', date('Y-m-d'));
 
+                    });
+                });
+            }
+            if (!is_null($request->checkoutdate))
+            {
+                $query->when(count($request->checkoutdate) == 2, function (Builder $q) use ($request)
+                {
+                    $q->whereBetween('edate', [
+                        $request->checkoutdate[0] . ' 0:0:0',
+                        $request->checkoutdate[1] . ' 23:59:59'
+                    ]);
+                });
+            }
+            $query->when(!is_null($request->tel), function (Builder $q) use ($request)
+            {
+                $q->where('booktel', 'like', '%' . $request->tel . '%');
+            });
+            $query->when(!is_null($request->name), function (Builder $q) use ($request)
+            {
+                $q->where('bookname', 'like', '%' . $request->name . '%');
+            });
+            $query->when(!is_null($request->agentid), function (Builder $q) use ($request)
+            {
+                $q->where('orgid', $request->agentid);
+            });
+            var_dump($query->toSql());
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $query->orderBy('id', 'desc')->paginate($pagesize)
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
     /*
      * 客房预订确认
      */
@@ -682,7 +751,7 @@ class HotelController extends Controller
             DB::beginTransaction();
             $mealbook = MealBook::create([
                 'shipno'    => $request->shipno,
-                'mealdate'  => $request->mealdate,
+                'mealdate'  => date('Y-m-d', strtotime($request->mealdate)),
                 'bookname'  => $request->bookname,
                 'booktel'   => $request->booktel,
                 'booknote'  => $request->booknote,

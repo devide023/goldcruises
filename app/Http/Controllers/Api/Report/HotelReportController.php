@@ -12,6 +12,7 @@ class HotelReportController extends Controller
 {
     use MyArrayTool;
     use RemainRoomTypeQty;
+
     //
     /*
      * 房间预订报表
@@ -114,6 +115,7 @@ class HotelReportController extends Controller
             ];
         }
     }
+
     /*
      * 当日房间预订情况
      */
@@ -121,13 +123,13 @@ class HotelReportController extends Controller
     {
         try
         {
-            $rq = $request->rq??date('Y-m-d');
+            $rq = $request->rq ?? date('Y-m-d');
             $agentid = $request->agentid;
-            $result = $this->curdate_bookroomtype_qty($rq,$agentid);
+            $result = $this->curdate_bookroomtype_qty($rq, $agentid);
             return [
-                'code'=>1,
-                'msg'=>'ok',
-                'result'=>$result
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $result
             ];
         } catch (Exception $exception)
         {
@@ -137,4 +139,110 @@ class HotelReportController extends Controller
             ];
         }
     }
+
+    /*
+     * 房间日期报表
+     */
+    public function date_roombook_report(Request $request)
+    {
+        try
+        {
+            if (is_null($request->date))
+            {
+                return [
+                    'code' => 0,
+                    'msg'  => '请选择查询时段'
+                ];
+            }
+            $ksrq = $request->date[0];
+            $jsrq = $request->date[1];
+            $sql = 'call hotel_book_report(\'' . $ksrq . '\',\'' . $jsrq . '\');';
+            $result = collect(DB::select($sql));
+            $group = $result->map(function ($item)
+            {
+                return collect($item)->only([
+                    'rq',
+                    'bookcnt'
+                ]);
+            })->unique();
+            $group->each(function ($i) use ($result)
+            {
+                $filter = $result->where('rq', $i['rq'])->where('bookcnt', $i['bookcnt']);
+                $details = $filter->map(function ($i)
+                {
+                    return collect($i)->only([
+                        'roomtypeid',
+                        'qty',
+                        'amount'
+                    ]);
+                });
+                $i['details'] = array_values($details->toArray());
+            });
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => array_values($group->toArray())
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
+    public function date_bookreport_detial(Request $request)
+    {
+        try
+        {
+            if (is_null($request->rq))
+            {
+                return $this->error();
+            }
+            $sql = '
+            select 
+  t1.*,
+  t2.name as agentname,
+  t3.name as roomtypename 
+from
+  (select 
+    ta.orgid,
+    tb.roomtypeid,
+    sum(tb.qty) qty 
+  from
+    sys_hotelbook ta,
+    sys_hotelbookdetail tb 
+  where ta.id = tb.bookid 
+    and ta.status in (1, 2) 
+    and (
+      ta.bdate = \'' . $request->rq . '\' 
+      or (
+        ta.bdate <= \'' . $request->rq . '\' 
+        and ta.edate > \'' . $request->rq . '\'
+      )
+    ) 
+  group by ta.orgid,
+    tb.roomtypeid) t1,
+  sys_organize t2,
+  sys_roomtype t3 
+where t1.orgid = t2.id 
+  and t1.roomtypeid = t3.id 
+  order by t1.orgid asc
+            ';
+            $result = DB::select($sql);
+            return [
+                'code'   => 1,
+                'msg'    => 'ok',
+                'result' => $result
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
 }
