@@ -511,8 +511,8 @@ class HotelController extends Controller
                     ]);
                     $q->orWhere(function (Builder $s) use ($request)
                     {
-                        $s->where('bdate', '<=', date('Y-m-d'))
-                            ->where('edate', '>', date('Y-m-d'));
+                        $s->where('bdate', '<=', $request->checkindate[0])
+                            ->where('edate', '>', $request->checkindate[0]);
 
                     });
                 });
@@ -573,8 +573,8 @@ class HotelController extends Controller
                     ]);
                     $q->orWhere(function (Builder $s) use ($request)
                     {
-                        $s->where('bdate', '<=', date('Y-m-d'))
-                            ->where('edate', '>', date('Y-m-d'));
+                        $s->where('bdate', '<=', $request->checkindate[0])
+                            ->where('edate', '>', $request->checkindate[0]);
 
                     });
                 });
@@ -880,7 +880,32 @@ class HotelController extends Controller
             ];
         }
     }
-
+    /*
+     * 用餐预订确认
+     */
+    public function bookmeal_ok(Request $request)
+    {
+        try
+        {
+            $id = $request->id ?? 0;
+            $ok = MealBook::where('id', $id)->where('status', '=', 1)->update([
+                'status' => $request->status
+            ]);
+            if ($ok)
+            {
+                return $this->success();
+            } else
+            {
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
     /*
      * 当天用房数量
      */

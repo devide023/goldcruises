@@ -44,7 +44,11 @@ class HotelBook extends Model
     protected $guarded=[];
     public $timestamps=false;
     protected $with=['shipname','details','addusername:id,name','statusname:statusid,name'];
-
+    protected $casts=[
+        'bdate'=>'date:m-d',
+        'edate'=>'date:m-d',
+        'addtime'=>'datetime:m-d H:i:s'
+    ];
     public function statusname(){
         return $this->belongsTo('App\Models\BookStatus','status','statusid');
     }
