@@ -294,7 +294,7 @@ class HotelController extends Controller
             }
             DB::beginTransaction();
             $dates = $request->hoteldate;
-            if (strtotime($dates[0]) < date('Y-m-d'))
+            if (strtotime($dates[0]) < strtotime(date('Y-m-d')))
             {
                 return [
                     'code' => 0,
@@ -399,7 +399,7 @@ class HotelController extends Controller
             $id = $request->id ?? 0;
             $book = HotelBook::find($id);
             $dates = $request->hoteldate;
-            if (strtotime($dates[0]) < date('Y-m-d'))
+            if (strtotime($dates[0]) < strtotime(date('Y-m-d')))
             {
                 return [
                     'code' => 0,
@@ -505,16 +505,16 @@ class HotelController extends Controller
             {
                 $query->when(count($request->checkindate) == 2, function (Builder $q) use ($request)
                 {
-                    $q->whereBetween('bdate', [
-                        $request->checkindate[0] . ' 0:0:0',
-                        $request->checkindate[1] . ' 23:59:59'
-                    ]);
-                    $q->orWhere(function (Builder $s) use ($request)
-                    {
-                        $s->where('bdate', '<=', $request->checkindate[0])
-                            ->where('edate', '>', $request->checkindate[0]);
+                    $q->where(function ($t) use ($request){
+                        $t->whereBetween('bdate',$request->checkindate)
+                            ->orWhere(function (Builder $s) use ($request)
+                        {
+                            $s->where('bdate', '<=', $request->checkindate[0])
+                                ->where('edate', '>', $request->checkindate[0]);
 
+                        });
                     });
+
                 });
             }
             if (!is_null($request->checkoutdate))
@@ -567,16 +567,16 @@ class HotelController extends Controller
             {
                 $query->when(count($request->checkindate) == 2, function (Builder $q) use ($request)
                 {
-                    $q->whereBetween('bdate', [
-                        $request->checkindate[0] . ' 0:0:0',
-                        $request->checkindate[1] . ' 23:59:59'
-                    ]);
-                    $q->orWhere(function (Builder $s) use ($request)
-                    {
-                        $s->where('bdate', '<=', $request->checkindate[0])
-                            ->where('edate', '>', $request->checkindate[0]);
+                    $q->where(function (Builder $a) use ($request){
+                        $a->whereBetween('bdate', $request->checkindate)
+                            ->orWhere(function (Builder $s) use ($request)
+                        {
+                            $s->where('bdate', '<=', $request->checkindate[0])
+                                ->where('edate', '>', $request->checkindate[0]);
 
+                        });
                     });
+
                 });
             }
             if (!is_null($request->checkoutdate))
