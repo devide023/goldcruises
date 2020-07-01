@@ -859,13 +859,13 @@ class HotelController extends Controller
             $query = MealBook::query();
             $orgids = $this->current_user_datapermission();
             $query->whereIn('orgid', $orgids);
-            $query->when(!is_null($request->bookname), function (Builder $q) use ($request)
+            $query->when(!is_null($request->name), function (Builder $q) use ($request)
             {
-                $q->where('bookname', 'like', '%' . $request->bookname . '%');
+                $q->where('bookname', 'like', '%' . $request->name . '%');
             });
-            $query->when(!is_null($request->booktel), function (Builder $q) use ($request)
+            $query->when(!is_null($request->tel), function (Builder $q) use ($request)
             {
-                $q->where('booktel', 'like', '%' . $request->booktel . '%');
+                $q->where('booktel', 'like', '%' . $request->tel . '%');
             });
             $query->when(!is_null($request->mealdate),function (Builder $q) use ($request){
                $q->whereBetween('mealdate',$request->mealdate);
