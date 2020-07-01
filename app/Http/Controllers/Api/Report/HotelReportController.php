@@ -245,4 +245,50 @@ where t1.orgid = t2.id
         }
     }
 
+    /*
+     * 代理商房型日期报表
+     */
+    public function agent_date_roombook(Request $request)
+    {
+        try
+        {
+            if (is_null($request->date))
+            {
+                return [
+                    'code' => 0,
+                    'msg'  => '请选择查询时段'
+                ];
+            }
+            $ksrq = $request->date[0];
+            $jsrq = $request->date[1];
+            $sql = 'call agent_date_bookqty(\'' . $ksrq . '\',\'' . $jsrq . '\');';
+            $result = collect(DB::select($sql));
+            $group = $result->map(function ($item){
+               return collect($item)->only(['rq','agentid','bookcnt','agentname']);
+            })->unique();
+            foreach ($group as $item){
+                $rq = $item['rq'];
+                $agentid = $item['agentid'];
+                $bookcnt = $item['bookcnt'];
+                $filters = $result->where('rq','=',$rq)
+                    ->where('agentid','=',$agentid);
+                $details = $filters->map(function ($i){
+                   return collect($i)->only(['roomtypeid','qty']);
+                });
+                $item['details'] = array_values($details->toArray());
+            }
+            return [
+              'code'=>1,
+              'msg'=>'ok',
+              'result'=>array_values($group->toArray())
+            ];
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
 }

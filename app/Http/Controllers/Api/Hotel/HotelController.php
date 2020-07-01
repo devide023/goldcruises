@@ -294,7 +294,7 @@ class HotelController extends Controller
             }
             DB::beginTransaction();
             $dates = $request->hoteldate;
-            if ($dates[0] < date('Y-m-d'))
+            if (strtotime($dates[0]) < date('Y-m-d'))
             {
                 return [
                     'code' => 0,
@@ -399,7 +399,7 @@ class HotelController extends Controller
             $id = $request->id ?? 0;
             $book = HotelBook::find($id);
             $dates = $request->hoteldate;
-            if ($dates[0] < date('Y-m-d'))
+            if (strtotime($dates[0]) < date('Y-m-d'))
             {
                 return [
                     'code' => 0,
@@ -866,6 +866,9 @@ class HotelController extends Controller
             $query->when(!is_null($request->booktel), function (Builder $q) use ($request)
             {
                 $q->where('booktel', 'like', '%' . $request->booktel . '%');
+            });
+            $query->when(!is_null($request->mealdate),function (Builder $q) use ($request){
+               $q->whereBetween('mealdate',$request->mealdate);
             });
             return [
                 'code'   => 1,

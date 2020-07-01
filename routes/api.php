@@ -206,6 +206,7 @@ Route::middleware('auth:api')->group(function ()
     Route::get('/hotel/report/cur_room_book','Api\Report\HotelReportController@current_bookroom_qty');
     Route::post('/hotel/report/date_roombook','Api\Report\HotelReportController@date_roombook_report');
     Route::post('/hotel/report/date_roombook_detail','Api\Report\HotelReportController@date_bookreport_detial');
+    Route::post('/hotel/report/agent_date_bookroom','Api\Report\HotelReportController@agent_date_roombook');
     //时间控位
     Route::get('/hotel/agentplace_date_list','Api\Hotel\AgentPlaceController@agentplace_date_list');
     Route::post('/hotel/agentplace_date','Api\Hotel\AgentPlaceController@add_agentplace_date');
