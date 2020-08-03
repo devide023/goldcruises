@@ -497,7 +497,7 @@ class HotelController extends Controller
     {
         try
         {
-            $pagesize = $request->pagesize;
+            $pagesize = $request->pagesize??15;
             $query = HotelBook::query();
             $orgids = $this->current_user_datapermission();
             $query->whereIn('orgid', $orgids);

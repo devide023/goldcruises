@@ -16,6 +16,11 @@ use Illuminate\Support\Facades\Route;
 Route::any('test', 'Api\TestController@test');
 Route::get('update_apk','Api\UpdateApkController@update');
 Route::get('wechatlogin','Api\WeChatController@login');
+Route::get('accesstoken','Api\WeChatController@fresh_mp_accesstoken');
+Route::get('gzhaccesstoken','Api\WeChatController@fresh_gzh_accesstoken');
+Route::get('gzhmenu','Api\WeChatController@gzh_menu');
+Route::get('getgzhmenu','Api\WeChatController@get_gzhmenu');
+Route::post('sendmsg','Api\WeChatController@sendmsg');
 Route::post('/wechat/adduserinfo','Api\WeChatController@addwechatinfo');
 Route::post('/wechat/updateuserinfo','Api\WeChatController@updatewechatinfo');
 Route::middleware('auth:api')->group(function ()
@@ -162,9 +167,6 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/mp/user_setting','Api\MicroProgram\MpController@usermpsetting');
     Route::get('/mp/getusersetting','Api\MicroProgram\MpController@getusermpsetting');
 
-    /*
-     * 微信相关
-     */
 
     /*
      * 报表

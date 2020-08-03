@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Repair;
 use App\Code\AuditIds;
 use App\Code\BusProcess;
 use App\Code\DataPermission;
+use App\Code\WeChat;
 use App\Http\Controllers\Controller;
 use App\Models\ProcessInfo;
 use App\Models\Repair;
@@ -24,6 +25,7 @@ class RepairController extends Controller
     use DataPermission;
     use AuditIds;
     use BusProcess;
+    use WeChat;
 
     //
     /*
@@ -149,13 +151,13 @@ class RepairController extends Controller
             $pagesize = $request->pagesize ?? 15;
             $orgids = $this->current_user_datapermission();
 
-            $query = Repair::whereIn('orgid',$orgids);
+            $query = Repair::whereIn('orgid', $orgids);
             $query = $query->where(function (Builder $q) use ($request)
             {
                 $uid = Auth::id();
-                    $q->orWhere('adduserid', $uid)
-                    ->orWhereHas('repairusers', function (Builder $s) use ($uid){
-                        $s->where('userid',$uid);
+                $q->orWhere('adduserid', $uid)->orWhereHas('repairusers', function (Builder $s) use ($uid)
+                    {
+                        $s->where('userid', $uid);
                     });
             });
             return [
@@ -259,7 +261,11 @@ class RepairController extends Controller
                         'repairid' => $repair->id
                     ]);
                 }
-                return $this->success();
+                return [
+                    'code'     => 1,
+                    'msg'      => '数据操作成功',
+                    'repairid' => $repair->id
+                ];
             } else
             {
                 return $this->error();
@@ -463,6 +469,7 @@ class RepairController extends Controller
         }
 
     }
+
     private function checkrepairno($repairno)
     {
         $has = Repair::where('repairno', $repairno)->count();
@@ -746,12 +753,13 @@ class RepairController extends Controller
             $dealuserid = $request->dealuserid ?? [];
             if ($billid > 0 && count($dealuserid) > 0)
             {
-                $posdata=[];
-                foreach ($dealuserid as $userid){
-                    array_push($posdata,[
-                        'userid'=>$userid,
-                        'adduserid'=>Auth::id(),
-                        'addtime'=>now()
+                $posdata = [];
+                foreach ($dealuserid as $userid)
+                {
+                    array_push($posdata, [
+                        'userid'    => $userid,
+                        'adduserid' => Auth::id(),
+                        'addtime'   => now()
                     ]);
                 }
                 $repairobj = Repair::find($billid);
@@ -759,8 +767,8 @@ class RepairController extends Controller
                 $repairobj->repairusers()->createMany($posdata);
                 $tempuser = User::find($dealuserid[0]);
                 $ok = $repairobj->update([
-                    'dealuserid' => $tempuser->id,
-                    'dealperson' => $tempuser->name,
+                    'dealuserid'    => $tempuser->id,
+                    'dealperson'    => $tempuser->name,
                     'dealpersontel' => $tempuser->tel,
                     'senduserid'    => Auth::id(),
                     'sendperson'    => Auth::user()->name,
@@ -824,8 +832,8 @@ class RepairController extends Controller
             ]);
             if ($ok)
             {
-                $cnt = ProcessInfo::where('billid', $billid)->where('processid', '=', REPAIR_PROCESS)->where('isover', '=', 0)
-                    ->update([
+                $cnt = ProcessInfo::where('billid', $billid)->where('processid', '=', REPAIR_PROCESS)
+                    ->where('isover', '=', 0)->update([
                         'isover' => 1
                     ]);
                 if ($cnt > 0)
