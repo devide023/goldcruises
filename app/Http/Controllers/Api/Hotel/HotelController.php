@@ -642,6 +642,35 @@ class HotelController extends Controller
         }
     }
 
+    /**
+     * @param Request $request
+     * @return array
+     * 反审核
+     */
+    public function bookroom_unaudit(Request $request)
+    {
+        try
+        {
+            $id = $request->id ?? 0;
+            $ok = HotelBook::where('id', $id)->where('status', '=', 2)->update([
+                'status' => 1
+            ]);
+            if ($ok)
+            {
+                return $this->success();
+            } else
+            {
+                return $this->error();
+            }
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
     /*
      * 套餐列表
      */

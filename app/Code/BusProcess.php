@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 trait BusProcess
 {
     use AuditIds;
-
+    use WeChat;
     public function current_step($process_id, $bill_id)
     {
         try
@@ -97,6 +97,7 @@ trait BusProcess
                     $cnt = ProcessInfo::where('processid', $process_id)->where('billid', $bill_id)->increment('stepno');
                     if ($cnt > 0)
                     {
+                        $this->sendmsg($bill_id);
                         return [
                             'code' => 1,
                             'msg'  => '数据提交成功'
@@ -141,6 +142,7 @@ trait BusProcess
                 'flow'      => 1,
                 'isover'    => 0
             ]);
+            $this->sendmsg($bill_id);
         } catch (Exception $exception)
         {
             return [

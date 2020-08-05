@@ -14,21 +14,22 @@ class WeChatController extends Controller
 {
     use WeChatConfig;
     use \App\Code\WeChat;
+
     //
     public function login(Request $request)
     {
         try
         {
             $code = $request->code;
-            $usercode = $request->usercode??'';
+            $usercode = $request->usercode ?? '';
             $url = 'https://api.weixin.qq.com/sns/jscode2session?appid=' . self::$APPID . '&secret=' . self::$secret . '&js_code=' . $code . '&grant_type=authorization_code';
 
             $result = json_decode(file_get_contents($url));
-            if(!empty($usercode) && !is_null($result->openid) && !is_null($result->session_key))
+            if (!empty($usercode) && !is_null($result->openid) && !is_null($result->session_key))
             {
-                User::where('usercode',$usercode)->update([
-                   'openid' => $result->openid,
-                   'session_key'=>$result->session_key
+                User::where('usercode', $usercode)->update([
+                    'openid'      => $result->openid,
+                    'session_key' => $result->session_key
                 ]);
             }
             return [
@@ -125,7 +126,7 @@ class WeChatController extends Controller
     {
         try
         {
-           return $this->fresh_accesstoken('mp',self::$APPID,self::$secret);
+            return $this->fresh_accesstoken('mp', self::$APPID, self::$secret);
         } catch (Exception $exception)
         {
             return [
@@ -139,7 +140,7 @@ class WeChatController extends Controller
     {
         try
         {
-            return $this->fresh_accesstoken('gzh',self::$gzhAPPID,self::$gzhsecret);
+            return $this->fresh_accesstoken('gzh', self::$gzhAPPID, self::$gzhsecret);
         } catch (Exception $exception)
         {
             return [
@@ -153,8 +154,8 @@ class WeChatController extends Controller
     {
         try
         {
-            $token = $this->fresh_accesstoken('gzh',self::$gzhAPPID,self::$gzhsecret);
-            $url = 'https://api.weixin.qq.com/cgi-bin/menu/get?access_token='.$token;
+            $token = $this->fresh_accesstoken('gzh', self::$gzhAPPID, self::$gzhsecret);
+            $url = 'https://api.weixin.qq.com/cgi-bin/menu/get?access_token=' . $token;
             var_dump($url);
             $res = file_get_contents($url);
             $result = json_decode($res);
@@ -168,28 +169,29 @@ class WeChatController extends Controller
             ];
         }
     }
+
     public function gzh_menu(Request $request)
     {
         try
         {
-            $token = $this->fresh_accesstoken('gzh',self::$gzhAPPID,self::$gzhsecret);
-            $url='https://api.weixin.qq.com/cgi-bin/menu/create?access_token='.$token;
+            $token = $this->fresh_accesstoken('gzh', self::$gzhAPPID, self::$gzhsecret);
+            $url = 'https://api.weixin.qq.com/cgi-bin/menu/create?access_token=' . $token;
             $data = [
-                'button'=>[
+                'button' => [
                     [
-                        'name'=>'a',
-                        'type'=>'view',
-                        'url'=>'http://www.baidu.com'
+                        'name' => 'a',
+                        'type' => 'view',
+                        'url'  => 'http://www.baidu.com'
                     ],
                     [
-                        'name'=>'b',
-                        'sub_button'=>[
+                        'name'       => 'b',
+                        'sub_button' => [
                             [
-                                'type'=>'miniprogram',
-                                'name'=>'wxa',
-                                 'url'=>'http://mp.weixin.qq.com',
-                                 'appid'=>self::$APPID,
-                                 'pagepath'=>'pages/login/login'
+                                'type'     => 'miniprogram',
+                                'name'     => 'wxa',
+                                'url'      => 'http://mp.weixin.qq.com',
+                                'appid'    => self::$APPID,
+                                'pagepath' => 'pages/login/login'
                             ]
                         ]
                     ]
@@ -214,21 +216,51 @@ class WeChatController extends Controller
         $timestamp = $request->timestamp;
         $nonce = $request->nonce;
         $token = self::$token;
-        $tmpArr = array($token, $timestamp, $nonce);
+        $tmpArr = array(
+            $token,
+            $timestamp,
+            $nonce
+        );
         sort($tmpArr, SORT_STRING);
-        $tmpStr = implode( $tmpArr );
-        $tmpStr = sha1( $tmpStr );
-        if( $tmpStr == $signature ){
+        $tmpStr = implode($tmpArr);
+        $tmpStr = sha1($tmpStr);
+        if ($tmpStr == $signature)
+        {
             return $request->echostr;
-        }else{
+        } else
+        {
             return false;
         }
     }
 
+    public function send_wechat_msg(Request $request)
+    {
+        try
+        {
+            $billid = $request->billid ?? 0;
+            if ($billid > 0)
+            {
+                return $this->sendmsg($billid);
+            } else
+            {
+                return $this->error();
+            }
+
+        } catch (Exception $exception)
+        {
+            return [
+                'code' => 0,
+                'msg'  => $exception->getMessage()
+            ];
+        }
+    }
+
     //将字符串写入文件
-    function put_to_file($file, $content) {
+    function put_to_file($file, $content)
+    {
         $fopen = fopen($file, 'a');
-        if (!$fopen) {
+        if (!$fopen)
+        {
             return false;
         }
         fwrite($fopen, $content);

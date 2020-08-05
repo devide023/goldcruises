@@ -20,7 +20,7 @@ Route::get('accesstoken','Api\WeChatController@fresh_mp_accesstoken');
 Route::get('gzhaccesstoken','Api\WeChatController@fresh_gzh_accesstoken');
 Route::get('gzhmenu','Api\WeChatController@gzh_menu');
 Route::get('getgzhmenu','Api\WeChatController@get_gzhmenu');
-Route::post('sendmsg','Api\WeChatController@sendmsg');
+Route::post('sendmsg','Api\WeChatController@send_wechat_msg');
 Route::post('/wechat/adduserinfo','Api\WeChatController@addwechatinfo');
 Route::post('/wechat/updateuserinfo','Api\WeChatController@updatewechatinfo');
 Route::middleware('auth:api')->group(function ()
@@ -192,6 +192,7 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/hotel/bookroomlist','Api\Hotel\HotelController@bookroomlist');
     Route::post('/hotel/bookroomlist_new','Api\Hotel\HotelController@bookroomlist_new');
     Route::post('/hotel/bookroom_ok','Api\Hotel\HotelController@bookroom_ok');
+    Route::post('/hotel/bookroom_unaudit','Api\Hotel\HotelController@bookroom_unaudit');
 
     Route::get('/hotel/meallist','Api\Hotel\HotelController@meallist');
     Route::post('/hotel/addmeal','Api\Hotel\HotelController@addmeal');
