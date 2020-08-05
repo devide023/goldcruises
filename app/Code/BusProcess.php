@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\DB;
 trait BusProcess
 {
     use AuditIds;
-    use WeChat;
     public function current_step($process_id, $bill_id)
     {
         try

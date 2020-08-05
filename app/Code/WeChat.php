@@ -12,8 +12,6 @@ use Illuminate\Support\Facades\DB;
 trait WeChat
 {
     use WeChatConfig;
-    use AuditIds;
-    use BusProcess;
 
     public function request_post($url = '', $data = null)
     {
