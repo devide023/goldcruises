@@ -14,3 +14,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', 'Api\WeChatController@checkSignature');
+Route::get('/test','Web\MyTestController@html_text');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Code\UserTrail;
 use App\Code\Utils;
 use App\Http\Controllers\Controller;
 use App\Models\Menu;
@@ -21,7 +22,7 @@ use Ramsey\Uuid\Uuid;
 class UserController extends Controller
 {
     use Utils;
-
+    use  UserTrail;
     public function list(Request $request)
     {
         try
@@ -724,19 +725,7 @@ class UserController extends Controller
      */
     public function getusermenus(Request $request)
     {
-        $menu = DB::table('roleuser')->where('roleuser.userid', $request->id)
-            ->join('rolemenu', 'roleuser.roleid', '=', 'rolemenu.roleid')
-            ->join('menu', 'rolemenu.menuid', '=', 'menu.id')->select([
-                'menu.id',
-                'menu.pid',
-                'menu.menucode as code',
-                'menu.name as title',
-                'menu.menutype',
-                'menu.path',
-                'menu.viewpath',
-                'menu.icon',
-            ])->where('menu.status', '=', 1)->distinct()->get();
-        return $menu;
+        return  $this->usermenubyid($request->id);
     }
 
     /***

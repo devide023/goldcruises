@@ -254,17 +254,4 @@ class WeChatController extends Controller
             ];
         }
     }
-
-    //将字符串写入文件
-    function put_to_file($file, $content)
-    {
-        $fopen = fopen($file, 'a');
-        if (!$fopen)
-        {
-            return false;
-        }
-        fwrite($fopen, $content);
-        fclose($fopen);
-        return true;
-    }
 }

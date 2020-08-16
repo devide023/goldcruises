@@ -22,6 +22,7 @@ class UserRoute
         $root = strtolower($request->root());
         $url = strtolower($request->url());
         $routes = $this->get_current_user_route();
+        var_dump($routes);
         $currenturl = str_replace($root . '/', '', $url);
         $cnt = collect($routes)->where('route', $currenturl)->count();
         if ($cnt > 0)

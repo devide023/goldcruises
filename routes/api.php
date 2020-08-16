@@ -201,6 +201,7 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/hotel/addmealbook','Api\Hotel\HotelController@addmealbook');
     Route::post('/hotel/editmealbook','Api\Hotel\HotelController@editmealbook');
     Route::post('/hotel/bookmeal_ok','Api\Hotel\HotelController@bookmeal_ok');
+    Route::post('/hotel/bookmeal_unaudit','Api\Hotel\HotelController@bookmeal_unaudit');
     //新增代理商控位
     Route::post('/hotel/add_agentplace','Api\Hotel\AgentPlaceController@add_agent_place');
     Route::post('/hotel/edit_agentplace','Api\Hotel\AgentPlaceController@edit_agent_place');
@@ -216,7 +217,12 @@ Route::middleware('auth:api')->group(function ()
     Route::post('/hotel/edit_agentplace_date','Api\Hotel\AgentPlaceController@edit_agentplace_date');
     Route::post('/hotel/agentplace_date_status','Api\Hotel\AgentPlaceController@agentplace_date_status');
 
+    /**
+     * Echarts图表
+     */
 
+    Route::get('/echarts/datebookcnt','Api\ECharts\EChartsController@date_book_count');
+    Route::get('/echarts/agentbookcnt','Api\ECharts\EChartsController@agent_book_cnt');
 });
 
 Route::post('/login', 'Api\UserController@login');
