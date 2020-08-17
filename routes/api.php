@@ -223,6 +223,7 @@ Route::middleware('auth:api')->group(function ()
 
     Route::get('/echarts/datebookcnt','Api\ECharts\EChartsController@date_book_count');
     Route::get('/echarts/agentbookcnt','Api\ECharts\EChartsController@agent_book_cnt');
+    Route::get('/echarts/agentroombookcnt','Api\ECharts\EChartsController@agent_date_book_room_cnt');
 });
 
 Route::post('/login', 'Api\UserController@login');
