@@ -16,28 +16,7 @@ class TestController extends Controller
     {
         try
         {
-            $a = [
-                [
-                    'userid'   => 1,
-                    'username' => 'a',
-                    'cnt'      => 3
-                ],
-                [
-                    'userid'   => 2,
-                    'username' => 'b',
-                    'cnt'      => 4
-                ],
-                [
-                    'userid'   => 3,
-                    'username' => 'c',
-                    'cnt'      => 5
-                ]
-            ];
-            return collect($a)->map(function ($item)
-            {
-                return collect($item)->only(['userid','cnt']);
-            });
-
+           return cal_info(0);
 
         } catch (Exception $exception)
         {

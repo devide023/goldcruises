@@ -15,3 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', 'Api\WeChatController@checkSignature');
 Route::get('/test','Web\MyTestController@html_text');
+Route::get('/info','Web\MyTestController@info');
+Route::get('/redis','Web\MyTestController@redistest');
+Route::get('/gold_order','Web\ES\ESController@getorders');
+Route::get('/localuser','Web\ES\ESController@getlocalusers');
