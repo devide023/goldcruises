@@ -7,10 +7,16 @@ use App\Code\MyPost;
 use App\Code\UserTrail;
 use App\Code\WeChat;
 use App\Http\Controllers\Controller;
+use App\Models\HotelBook;
+use App\Models\HotelBookDetail;
+use App\Models\User;
 use Elasticsearch\ClientBuilder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Redis;
+use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Schema;
+use PhpParser\Node\Stmt\TryCatch;
 use Illuminate\Support\Facades\Storage;
 
 class MyTestController extends Controller
@@ -23,31 +29,91 @@ class MyTestController extends Controller
 
     public function info()
     {
-        $hosts = [
-            '192.168.20.89:9200',
-        ];
-        $client = ClientBuilder::create()           // Instantiate a new ClientBuilder
-        ->setHosts($hosts)      // Set the hosts
-        ->build();
-        $params = [
-            'index' => 'chengssion',
-            //'id' => 1, #可以手动指定id，也可以不指定随机生成
-            'body' => [
-                'first_name' => '张',
-                'last_name' => '三',
-                'age' => 35
-            ]
-        ];
-        $res = $client->index($params);
+        return phpinfo();
+    }
+
+    public function hotelbook()
+    {
+        $cols = Schema::getColumnListing('hotelbook');
+        $hotel = HotelBook::query();
+        $list = $hotel->get();
+        foreach ($list as $item) {
+            $key = 'hotelbook:' . $item->id;
+            $temp = [];
+            $changecols = ['bdate', 'edate', 'addtime'];
+            foreach ($cols as $col) {
+                if (in_array($col, $changecols, true)) {
+                    $t = date('Y-m-d H:i:s', strtotime($item->bdate));
+                    $temp[$col] = $t;
+                } else {
+                    $temp[$col] = $item->$col;
+                }
+            }
+            Redis::hmset($key, $temp);
+        }
+        //
+        $cols = Schema::getColumnListing('hotelbookdetail');
+        $detail = HotelBookDetail::query();
+        $list = $detail->get();
+        foreach ($list as $item) {
+            $key = 'hotelbookdetail:' . $item->id;
+            $temp = [];
+            foreach ($cols as $col) {
+                $temp[$col] = $item->$col;
+            }
+            Redis::hmset($key, $temp);
+        }
+    }
+
+    public function gethotelbook(Request $request)
+    {
+        $id = $request->id ?? 0;
+        $key = 'hotelbook:' . $id;
+        return Redis::hgetall($key);
+    }
+
+    public function msg()
+    {
+        Redis::publish('c1', 'hello world');
+    }
+
+    public function finduser(Request $request)
+    {
+        $uid = $request->id ?? 1;
+        $res = Redis::hgetall('user:' . $uid);
         return $res;
     }
 
+    public function filminfo(Request $request)
+    {
+        $id = $request->id??0;
+        Redis::select(1);
+        $films = Redis::hgetall('film:'.$id);
+        return $films;
+    }
     public function redistest()
     {
-        $redis = new Redis();
-        $redis->connect('127.0.0.1', 6380);
-        $v = $redis->set('k1', 'v1');
-        var_dump($v);
+        try {
+            $user = User::query();
+            $list = $user->get();
+            $cols = \Schema::getColumnListing('user');
+
+            foreach ($list as $item) {
+                $key = 'user:' . $item->id;
+                $temp = [];
+                foreach ($cols as $col) {
+                    $temp[$col] = $item->$col;
+                }
+                Redis::hmset($key, $temp);
+            }
+
+
+        } catch (Exception $exception) {
+            return [
+                'code' => 0,
+                'msg' => $exception->getMessage()
+            ];
+        }
     }
 
     public function html_text(Request $request)
